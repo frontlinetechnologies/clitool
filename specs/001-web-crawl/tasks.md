@@ -24,14 +24,14 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create project structure per implementation plan (src/cli/, src/crawler/, src/parsers/, src/output/, src/models/, src/utils/, tests/unit/, tests/integration/, tests/fixtures/)
-- [ ] T002 Initialize TypeScript project with package.json, tsconfig.json (strict mode enabled)
-- [ ] T003 [P] Install dependencies: playwright, cheerio, commander, robots-parser, @types/node, typescript
-- [ ] T004 [P] Install dev dependencies: jest, @types/jest, ts-jest, @playwright/test, eslint, @typescript-eslint/parser, @typescript-eslint/eslint-plugin
-- [ ] T005 [P] Configure Jest in jest.config.js with TypeScript support
-- [ ] T006 [P] Configure ESLint in .eslintrc.js with TypeScript rules
-- [ ] T007 [P] Create .gitignore with node_modules/, dist/, coverage/, .env
-- [ ] T008 Create README.md with project description and installation instructions
+- [X] T001 Create project structure per implementation plan (src/cli/, src/crawler/, src/parsers/, src/output/, src/models/, src/utils/, tests/unit/, tests/integration/, tests/fixtures/)
+- [X] T002 Initialize TypeScript project with package.json, tsconfig.json (strict mode enabled)
+- [X] T003 [P] Install dependencies: playwright, cheerio, commander, robots-parser, @types/node, typescript
+- [X] T004 [P] Install dev dependencies: jest, @types/jest, ts-jest, @playwright/test, eslint, @typescript-eslint/parser, @typescript-eslint/eslint-plugin
+- [X] T005 [P] Configure Jest in jest.config.js with TypeScript support
+- [X] T006 [P] Configure ESLint in .eslintrc.js with TypeScript rules
+- [X] T007 [P] Create .gitignore with node_modules/, dist/, coverage/, .env
+- [X] T008 Create README.md with project description and installation instructions
 
 ---
 
@@ -41,11 +41,11 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T009 Create base error handling utilities in src/utils/errors.ts (CrawlError class, error types)
-- [ ] T010 [P] Create URL validation utility in src/utils/url-validator.ts (validate URL format, prevent SSRF)
-- [ ] T011 [P] Create domain extraction utility in src/utils/domain.ts (extract domain from URL, check same-domain)
-- [ ] T012 Create base logger utility in src/utils/logger.ts (structured logging, quiet mode support)
-- [ ] T013 [P] Create signal handler utility in src/utils/signals.ts (SIGINT/SIGTERM handling for graceful shutdown)
+- [X] T009 Create base error handling utilities in src/utils/errors.ts (CrawlError class, error types)
+- [X] T010 [P] Create URL validation utility in src/utils/url-validator.ts (validate URL format, prevent SSRF)
+- [X] T011 [P] Create domain extraction utility in src/utils/domain.ts (extract domain from URL, check same-domain)
+- [X] T012 Create base logger utility in src/utils/logger.ts (structured logging, quiet mode support)
+- [X] T013 [P] Create signal handler utility in src/utils/signals.ts (SIGINT/SIGTERM handling for graceful shutdown)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -61,24 +61,24 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T014 [P] [US1] Unit test for URL normalizer in tests/unit/utils/url-normalizer.test.ts (test normalization, deduplication)
-- [ ] T015 [P] [US1] Unit test for page processor in tests/unit/crawler/page-processor.test.ts (test page discovery, link extraction)
-- [ ] T016 [P] [US1] Integration test for basic crawl flow in tests/integration/crawler.test.ts (test end-to-end crawl with mock server)
+- [X] T014 [P] [US1] Unit test for URL normalizer in tests/unit/utils/url-normalizer.test.ts (test normalization, deduplication)
+- [X] T015 [P] [US1] Unit test for page processor in tests/unit/crawler/page-processor.test.ts (test page discovery, link extraction)
+- [X] T016 [P] [US1] Integration test for basic crawl flow in tests/integration/crawler.test.ts (test end-to-end crawl with mock server)
 
 ### Implementation for User Story 1
 
-- [ ] T017 [P] [US1] Create Page model in src/models/page.ts (url, status, title, discoveredAt, processedAt, links, error fields)
-- [ ] T018 [P] [US1] Create CrawlSummary model in src/models/crawl-summary.ts (totalPages, errors, skipped, interrupted, startTime, endTime, duration)
-- [ ] T019 [P] [US1] Implement URL normalizer in src/crawler/url-normalizer.ts (normalize trailing slashes, remove fragments, preserve query strings)
-- [ ] T020 [US1] Implement page processor in src/crawler/page-processor.ts (use Playwright to load page, extract HTML, discover links)
-- [ ] T021 [US1] Implement main crawler orchestration in src/crawler/crawler.ts (initialize crawl, queue management, page discovery loop)
-- [ ] T022 [US1] Implement progress reporter in src/utils/progress.ts (real-time progress updates with carriage return, quiet mode support)
-- [ ] T023 [US1] Implement JSON formatter in src/output/json-formatter.ts (format crawl results as JSON per schema)
-- [ ] T024 [US1] Implement CLI command in src/cli/crawl.ts (commander setup, URL argument, basic crawl execution)
-- [ ] T025 [US1] Add interruption handling in src/crawler/crawler.ts (listen for SIGINT/SIGTERM, save partial results on interrupt)
-- [ ] T026 [US1] Add error handling for network errors, invalid URLs, unreachable pages in src/crawler/crawler.ts
-- [ ] T027 [US1] Add redirect handling (follow same-domain redirects, skip external) in src/crawler/page-processor.ts
-- [ ] T028 [US1] Add infinite redirect loop detection in src/crawler/crawler.ts (track redirect chain, detect cycles)
+- [X] T017 [P] [US1] Create Page model in src/models/page.ts (url, status, title, discoveredAt, processedAt, links, error fields)
+- [X] T018 [P] [US1] Create CrawlSummary model in src/models/crawl-summary.ts (totalPages, errors, skipped, interrupted, startTime, endTime, duration)
+- [X] T019 [P] [US1] Implement URL normalizer in src/crawler/url-normalizer.ts (normalize trailing slashes, remove fragments, preserve query strings)
+- [X] T020 [US1] Implement page processor in src/crawler/page-processor.ts (use Playwright to load page, extract HTML, discover links)
+- [X] T021 [US1] Implement main crawler orchestration in src/crawler/crawler.ts (initialize crawl, queue management, page discovery loop)
+- [X] T022 [US1] Implement progress reporter in src/utils/progress.ts (real-time progress updates with carriage return, quiet mode support)
+- [X] T023 [US1] Implement JSON formatter in src/output/json-formatter.ts (format crawl results as JSON per schema)
+- [X] T024 [US1] Implement CLI command in src/cli/crawl.ts (commander setup, URL argument, basic crawl execution)
+- [X] T025 [US1] Add interruption handling in src/crawler/crawler.ts (listen for SIGINT/SIGTERM, save partial results on interrupt)
+- [X] T026 [US1] Add error handling for network errors, invalid URLs, unreachable pages in src/crawler/crawler.ts
+- [X] T027 [US1] Add redirect handling (follow same-domain redirects, skip external) in src/crawler/page-processor.ts
+- [X] T028 [US1] Add infinite redirect loop detection in src/crawler/crawler.ts (track redirect chain, detect cycles)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently. Running `crawl <url>` should discover pages and output JSON results.
 
@@ -92,19 +92,19 @@
 
 ### Tests for User Story 2
 
-- [ ] T029 [P] [US2] Unit test for HTML parser in tests/unit/parsers/html-parser.test.ts (test form, button, input extraction)
-- [ ] T030 [P] [US2] Integration test for element extraction in tests/integration/elements.test.ts (test crawl with sample HTML fixtures)
+- [X] T029 [P] [US2] Unit test for HTML parser in tests/unit/parsers/html-parser.test.ts (test form, button, input extraction)
+- [X] T030 [P] [US2] Integration test for element extraction in tests/integration/elements.test.ts (test crawl with sample HTML fixtures)
 
 ### Implementation for User Story 2
 
-- [ ] T031 [P] [US2] Create Form model in src/models/form.ts (id, action, method, pageUrl, inputFields fields)
-- [ ] T032 [P] [US2] Create Button model in src/models/button.ts (type, text, id, className, pageUrl, formId fields)
-- [ ] T033 [P] [US2] Create InputField model in src/models/input-field.ts (type, name, id, required, placeholder, pageUrl, formId fields)
-- [ ] T034 [US2] Implement HTML parser in src/parsers/html-parser.ts (use Cheerio to extract forms, buttons, inputs from HTML)
-- [ ] T035 [US2] Integrate HTML parser into page processor in src/crawler/page-processor.ts (extract elements after page load)
-- [ ] T036 [US2] Update crawler to collect elements in src/crawler/crawler.ts (store forms, buttons, inputs in crawl results)
-- [ ] T037 [US2] Update CrawlSummary model to include element counts in src/models/crawl-summary.ts (totalForms, totalButtons, totalInputFields)
-- [ ] T038 [US2] Update JSON formatter to include elements in output in src/output/json-formatter.ts (add forms, buttons, inputFields arrays)
+- [X] T031 [P] [US2] Create Form model in src/models/form.ts (id, action, method, pageUrl, inputFields fields)
+- [X] T032 [P] [US2] Create Button model in src/models/button.ts (type, text, id, className, pageUrl, formId fields)
+- [X] T033 [P] [US2] Create InputField model in src/models/input-field.ts (type, name, id, required, placeholder, pageUrl, formId fields)
+- [X] T034 [US2] Implement HTML parser in src/parsers/html-parser.ts (use Cheerio to extract forms, buttons, inputs from HTML)
+- [X] T035 [US2] Integrate HTML parser into page processor in src/crawler/page-processor.ts (extract elements after page load)
+- [X] T036 [US2] Update crawler to collect elements in src/crawler/crawler.ts (store forms, buttons, inputs in crawl results)
+- [X] T037 [US2] Update CrawlSummary model to include element counts in src/models/crawl-summary.ts (totalForms, totalButtons, totalInputFields)
+- [X] T038 [US2] Update JSON formatter to include elements in output in src/output/json-formatter.ts (add forms, buttons, inputFields arrays)
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently. The crawler should discover pages and identify interactive elements.
 
@@ -118,19 +118,19 @@
 
 ### Tests for User Story 3
 
-- [ ] T039 [P] [US3] Unit test for robots parser in tests/unit/parsers/robots-parser.test.ts (test robots.txt parsing, path checking)
-- [ ] T040 [P] [US3] Unit test for rate limiter in tests/unit/utils/rate-limiter.test.ts (test delay enforcement, 429 handling)
-- [ ] T041 [P] [US3] Integration test for robots.txt compliance in tests/integration/robots.test.ts (test crawl respects disallowed paths)
+- [X] T039 [P] [US3] Unit test for robots parser in tests/unit/parsers/robots-parser.test.ts (test robots.txt parsing, path checking)
+- [X] T040 [P] [US3] Unit test for rate limiter in tests/unit/utils/rate-limiter.test.ts (test delay enforcement, 429 handling)
+- [X] T041 [P] [US3] Integration test for robots.txt compliance in tests/integration/robots.test.ts (test crawl respects disallowed paths)
 
 ### Implementation for User Story 3
 
-- [ ] T042 [US3] Implement robots parser in src/parsers/robots-parser.ts (fetch robots.txt, parse with robots-parser library, check URL against rules)
-- [ ] T043 [US3] Integrate robots.txt checking into crawler in src/crawler/crawler.ts (check each URL before crawling, skip disallowed paths)
-- [ ] T044 [US3] Implement rate limiter in src/utils/rate-limiter.ts (configurable delay, await after each request)
-- [ ] T045 [US3] Integrate rate limiting into crawler in src/crawler/crawler.ts (apply delay after each page request)
-- [ ] T046 [US3] Add 429 response handling with exponential backoff in src/crawler/page-processor.ts (detect 429, back off, retry)
-- [ ] T047 [US3] Update CLI to accept rate-limit option in src/cli/crawl.ts (--rate-limit flag with default 1.5 seconds)
-- [ ] T048 [US3] Update CrawlSummary to track skipped pages in src/models/crawl-summary.ts (increment skipped count for robots.txt disallowed paths)
+- [X] T042 [US3] Implement robots parser in src/parsers/robots-parser.ts (fetch robots.txt, parse with robots-parser library, check URL against rules)
+- [X] T043 [US3] Integrate robots.txt checking into crawler in src/crawler/crawler.ts (check each URL before crawling, skip disallowed paths)
+- [X] T044 [US3] Implement rate limiter in src/utils/rate-limiter.ts (configurable delay, await after each request)
+- [X] T045 [US3] Integrate rate limiting into crawler in src/crawler/crawler.ts (apply delay after each page request)
+- [X] T046 [US3] Add 429 response handling with exponential backoff in src/crawler/page-processor.ts (detect 429, back off, retry)
+- [X] T047 [US3] Update CLI to accept rate-limit option in src/cli/crawl.ts (--rate-limit flag with default 1.5 seconds)
+- [X] T048 [US3] Update CrawlSummary to track skipped pages in src/models/crawl-summary.ts (increment skipped count for robots.txt disallowed paths)
 
 **Checkpoint**: At this point, User Stories 1, 2, AND 3 should all work independently. The crawler should respect robots.txt and implement rate limiting.
 
@@ -144,18 +144,18 @@
 
 ### Tests for User Story 4
 
-- [ ] T049 [P] [US4] Unit test for text formatter in tests/unit/output/text-formatter.test.ts (test human-readable summary formatting)
-- [ ] T050 [P] [US4] Integration test for summary output in tests/integration/output.test.ts (test JSON and text output formats)
+- [X] T049 [P] [US4] Unit test for text formatter in tests/unit/output/text-formatter.test.ts (test human-readable summary formatting)
+- [X] T050 [P] [US4] Integration test for summary output in tests/integration/output.test.ts (test JSON and text output formats)
 
 ### Implementation for User Story 4
 
-- [ ] T051 [US4] Implement text formatter in src/output/text-formatter.ts (format crawl summary as human-readable text)
-- [ ] T052 [US4] Update CLI to support output format option in src/cli/crawl.ts (--format flag: json|text, default json)
-- [ ] T053 [US4] Update CLI to support verbose mode in src/cli/crawl.ts (--verbose flag for detailed output)
-- [ ] T054 [US4] Update JSON formatter to include verbose details when requested in src/output/json-formatter.ts (include all page/element details in verbose mode)
-- [ ] T055 [US4] Update text formatter to show error and skipped page details in src/output/text-formatter.ts (include error summary, skipped paths)
-- [ ] T056 [US4] Update crawler to calculate duration on completion in src/crawler/crawler.ts (set endTime, calculate duration)
-- [ ] T057 [US4] Update CLI to support output file option in src/cli/crawl.ts (--output flag to save results to file)
+- [X] T051 [US4] Implement text formatter in src/output/text-formatter.ts (format crawl summary as human-readable text)
+- [X] T052 [US4] Update CLI to support output format option in src/cli/crawl.ts (--format flag: json|text, default json)
+- [X] T053 [US4] Update CLI to support verbose mode in src/cli/crawl.ts (--verbose flag for detailed output)
+- [X] T054 [US4] Update JSON formatter to include verbose details when requested in src/output/json-formatter.ts (include all page/element details in verbose mode)
+- [X] T055 [US4] Update text formatter to show error and skipped page details in src/output/text-formatter.ts (include error summary, skipped paths)
+- [X] T056 [US4] Update crawler to calculate duration on completion in src/crawler/crawler.ts (set endTime, calculate duration)
+- [X] T057 [US4] Update CLI to support output file option in src/cli/crawl.ts (--output flag to save results to file)
 
 **Checkpoint**: All user stories should now be independently functional. The crawler should output comprehensive summaries in both JSON and text formats.
 
@@ -165,17 +165,17 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T058 [P] Add comprehensive error messages with actionable guidance in src/utils/errors.ts (improve error messages per Article III)
-- [ ] T059 [P] Add CLI help text and examples in src/cli/crawl.ts (--help output per Article IX)
-- [ ] T060 [P] Update README.md with usage examples, command options, and quickstart guide
-- [ ] T061 [P] Add code comments explaining "why" not "what" throughout codebase (per Article IX)
-- [ ] T062 [P] Add unit tests for remaining utilities in tests/unit/utils/ (domain.ts, url-validator.ts, logger.ts)
-- [ ] T063 [P] Add unit tests for models in tests/unit/models/ (validate model creation, serialization)
-- [ ] T064 Run quickstart.md validation (test all examples from quickstart.md work correctly)
-- [ ] T065 Verify 80% test coverage requirement (run coverage report, add tests if needed)
-- [ ] T066 Code cleanup and refactoring (remove unused code, improve naming, optimize)
-- [ ] T067 Performance optimization (profile crawl performance, optimize bottlenecks)
-- [ ] T068 Security review (validate URL input, prevent SSRF, review dependencies)
+- [X] T058 [P] Add comprehensive error messages with actionable guidance in src/utils/errors.ts (improve error messages per Article III)
+- [X] T059 [P] Add CLI help text and examples in src/cli/crawl.ts (--help output per Article IX)
+- [X] T060 [P] Update README.md with usage examples, command options, and quickstart guide
+- [X] T061 [P] Add code comments explaining "why" not "what" throughout codebase (per Article IX)
+- [X] T062 [P] Add unit tests for remaining utilities in tests/unit/utils/ (domain.ts, url-validator.ts, logger.ts)
+- [X] T063 [P] Add unit tests for models in tests/unit/models/ (validate model creation, serialization)
+- [X] T064 Run quickstart.md validation (test all examples from quickstart.md work correctly)
+- [X] T065 Verify 80% test coverage requirement (run coverage report, add tests if needed)
+- [X] T066 Code cleanup and refactoring (remove unused code, improve naming, optimize)
+- [X] T067 Performance optimization (profile crawl performance, optimize bottlenecks)
+- [X] T068 Security review (validate URL input, prevent SSRF, review dependencies)
 
 ---
 
