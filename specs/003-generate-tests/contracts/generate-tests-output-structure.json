@@ -1,0 +1,162 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Generate Tests Output Structure",
+  "description": "Structure description for generated Playwright test files. Note: Output is TypeScript files, not JSON. This schema describes the logical structure of generated test files.",
+  "type": "object",
+  "properties": {
+    "outputDirectory": {
+      "type": "string",
+      "description": "Directory where test files are saved (default: ./tests/generated/)"
+    },
+    "testFiles": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/TestFile"
+      },
+      "description": "Array of generated test files (one per user flow)"
+    },
+    "summary": {
+      "$ref": "#/definitions/TestGenerationSummary"
+    }
+  },
+  "definitions": {
+    "TestFile": {
+      "type": "object",
+      "required": ["filename", "testCases"],
+      "properties": {
+        "filename": {
+          "type": "string",
+          "pattern": "^.+\\.spec\\.ts$",
+          "description": "Test file name (e.g., login-flow.spec.ts)"
+        },
+        "flowName": {
+          "type": ["string", "null"],
+          "description": "Associated user flow name (if file is flow-based)"
+        },
+        "testCases": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TestCase"
+          },
+          "description": "Array of test cases in this file"
+        }
+      }
+    },
+    "TestCase": {
+      "type": "object",
+      "required": ["name", "type", "steps", "assertions"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Test case name/description"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["navigation", "form-submission", "scenario", "basic"],
+          "description": "Test type"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TestStep"
+          },
+          "description": "Array of test steps"
+        },
+        "assertions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Assertion"
+          },
+          "description": "Array of assertions"
+        }
+      }
+    },
+    "TestStep": {
+      "type": "object",
+      "required": ["action", "target", "order"],
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": ["goto", "fill", "click", "wait", "select"],
+          "description": "Action type"
+        },
+        "target": {
+          "type": "string",
+          "description": "Target element or URL"
+        },
+        "value": {
+          "type": ["string", "null"],
+          "description": "Value for actions like fill or select"
+        },
+        "locator": {
+          "type": ["string", "null"],
+          "description": "Playwright locator string"
+        },
+        "order": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Step order in sequence"
+        }
+      }
+    },
+    "Assertion": {
+      "type": "object",
+      "required": ["type", "target", "expected"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["url", "title", "visible", "value", "text"],
+          "description": "Assertion type"
+        },
+        "target": {
+          "type": "string",
+          "description": "Target element or page"
+        },
+        "expected": {
+          "type": "string",
+          "description": "Expected value"
+        },
+        "locator": {
+          "type": ["string", "null"],
+          "description": "Playwright locator for element assertions"
+        }
+      }
+    },
+    "TestGenerationSummary": {
+      "type": "object",
+      "required": ["totalTestFiles", "totalTestCases", "flowsCovered", "scenariosDetected", "pagesTested", "aiEnhanced"],
+      "properties": {
+        "totalTestFiles": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of generated test files"
+        },
+        "totalTestCases": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of test cases generated"
+        },
+        "flowsCovered": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of user flows covered"
+        },
+        "scenariosDetected": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of specific scenarios detected"
+        },
+        "pagesTested": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of pages with tests"
+        },
+        "aiEnhanced": {
+          "type": "boolean",
+          "description": "Whether AI was used for enhancement"
+        }
+      }
+    }
+  }
+}
+

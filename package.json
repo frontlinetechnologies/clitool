@@ -5,7 +5,8 @@
   "main": "dist/cli/crawl.js",
   "bin": {
     "crawl": "./dist/cli/crawl.js",
-    "generate-docs": "./dist/cli/generate-docs.js"
+    "generate-docs": "./dist/cli/generate-docs.js",
+    "generate-tests": "./dist/cli/generate-tests.js"
   },
   "scripts": {
     "build": "tsc",
