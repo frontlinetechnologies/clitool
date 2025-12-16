@@ -1,0 +1,203 @@
+{
+  "summary": {
+    "totalPages": 5,
+    "totalForms": 3,
+    "totalButtons": 3,
+    "totalInputFields": 8,
+    "errors": 0,
+    "skipped": 0,
+    "interrupted": false,
+    "startTime": "2024-01-01T00:00:00Z",
+    "endTime": "2024-01-01T00:05:00Z",
+    "duration": 300
+  },
+  "pages": [
+    {
+      "url": "https://example.com",
+      "status": 200,
+      "title": "Home",
+      "discoveredAt": "2024-01-01T00:00:00Z",
+      "processedAt": "2024-01-01T00:00:01Z",
+      "links": ["https://example.com/login", "https://example.com/products"]
+    },
+    {
+      "url": "https://example.com/login",
+      "status": 200,
+      "title": "Login",
+      "discoveredAt": "2024-01-01T00:00:02Z",
+      "processedAt": "2024-01-01T00:00:03Z",
+      "links": ["https://example.com/dashboard"]
+    },
+    {
+      "url": "https://example.com/dashboard",
+      "status": 200,
+      "title": "Dashboard",
+      "discoveredAt": "2024-01-01T00:00:04Z",
+      "processedAt": "2024-01-01T00:00:05Z",
+      "links": []
+    },
+    {
+      "url": "https://example.com/cart",
+      "status": 200,
+      "title": "Shopping Cart",
+      "discoveredAt": "2024-01-01T00:00:06Z",
+      "processedAt": "2024-01-01T00:00:07Z",
+      "links": ["https://example.com/checkout"]
+    },
+    {
+      "url": "https://example.com/checkout",
+      "status": 200,
+      "title": "Checkout",
+      "discoveredAt": "2024-01-01T00:00:08Z",
+      "processedAt": "2024-01-01T00:00:09Z",
+      "links": ["https://example.com/confirmation"]
+    }
+  ],
+  "forms": [
+    {
+      "id": "login-form",
+      "action": "/login",
+      "method": "POST",
+      "pageUrl": "https://example.com/login",
+      "inputFields": [
+        {
+          "type": "email",
+          "name": "email",
+          "required": true,
+          "pageUrl": "https://example.com/login",
+          "formId": "login-form"
+        },
+        {
+          "type": "password",
+          "name": "password",
+          "required": true,
+          "pageUrl": "https://example.com/login",
+          "formId": "login-form"
+        }
+      ]
+    },
+    {
+      "id": "checkout-form",
+      "action": "/checkout",
+      "method": "POST",
+      "pageUrl": "https://example.com/checkout",
+      "inputFields": [
+        {
+          "type": "text",
+          "name": "cardNumber",
+          "required": true,
+          "pageUrl": "https://example.com/checkout",
+          "formId": "checkout-form"
+        },
+        {
+          "type": "text",
+          "name": "cvv",
+          "required": true,
+          "pageUrl": "https://example.com/checkout",
+          "formId": "checkout-form"
+        },
+        {
+          "type": "tel",
+          "name": "billingPhone",
+          "required": true,
+          "pageUrl": "https://example.com/checkout",
+          "formId": "checkout-form"
+        }
+      ]
+    },
+    {
+      "id": "contact-form",
+      "action": "/contact",
+      "method": "POST",
+      "pageUrl": "https://example.com",
+      "inputFields": [
+        {
+          "type": "text",
+          "name": "name",
+          "required": true,
+          "pageUrl": "https://example.com",
+          "formId": "contact-form"
+        },
+        {
+          "type": "email",
+          "name": "email",
+          "required": true,
+          "pageUrl": "https://example.com",
+          "formId": "contact-form"
+        }
+      ]
+    }
+  ],
+  "buttons": [
+    {
+      "type": "submit",
+      "text": "Login",
+      "pageUrl": "https://example.com/login",
+      "formId": "login-form"
+    },
+    {
+      "type": "submit",
+      "text": "Complete Purchase",
+      "pageUrl": "https://example.com/checkout",
+      "formId": "checkout-form"
+    },
+    {
+      "type": "submit",
+      "text": "Send Message",
+      "pageUrl": "https://example.com",
+      "formId": "contact-form"
+    }
+  ],
+  "inputFields": [
+    {
+      "type": "email",
+      "name": "email",
+      "required": true,
+      "pageUrl": "https://example.com/login",
+      "formId": "login-form"
+    },
+    {
+      "type": "password",
+      "name": "password",
+      "required": true,
+      "pageUrl": "https://example.com/login",
+      "formId": "login-form"
+    },
+    {
+      "type": "text",
+      "name": "cardNumber",
+      "required": true,
+      "pageUrl": "https://example.com/checkout",
+      "formId": "checkout-form"
+    },
+    {
+      "type": "text",
+      "name": "cvv",
+      "required": true,
+      "pageUrl": "https://example.com/checkout",
+      "formId": "checkout-form"
+    },
+    {
+      "type": "tel",
+      "name": "billingPhone",
+      "required": true,
+      "pageUrl": "https://example.com/checkout",
+      "formId": "checkout-form"
+    },
+    {
+      "type": "text",
+      "name": "name",
+      "required": true,
+      "pageUrl": "https://example.com",
+      "formId": "contact-form"
+    },
+    {
+      "type": "email",
+      "name": "email",
+      "required": true,
+      "pageUrl": "https://example.com",
+      "formId": "contact-form"
+    }
+  ]
+}
+

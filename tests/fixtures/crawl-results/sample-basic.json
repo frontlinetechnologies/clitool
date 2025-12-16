@@ -1,0 +1,105 @@
+{
+  "summary": {
+    "totalPages": 3,
+    "totalForms": 1,
+    "totalButtons": 2,
+    "totalInputFields": 3,
+    "errors": 0,
+    "skipped": 0,
+    "interrupted": false,
+    "startTime": "2024-01-01T00:00:00Z",
+    "endTime": "2024-01-01T00:05:00Z",
+    "duration": 300
+  },
+  "pages": [
+    {
+      "url": "https://example.com",
+      "status": 200,
+      "title": "Example Home",
+      "discoveredAt": "2024-01-01T00:00:00Z",
+      "processedAt": "2024-01-01T00:00:01Z",
+      "links": ["https://example.com/about", "https://example.com/contact"]
+    },
+    {
+      "url": "https://example.com/about",
+      "status": 200,
+      "title": "About Us",
+      "discoveredAt": "2024-01-01T00:00:02Z",
+      "processedAt": "2024-01-01T00:00:03Z",
+      "links": ["https://example.com"]
+    },
+    {
+      "url": "https://example.com/contact",
+      "status": 200,
+      "title": "Contact",
+      "discoveredAt": "2024-01-01T00:00:04Z",
+      "processedAt": "2024-01-01T00:00:05Z",
+      "links": ["https://example.com"]
+    }
+  ],
+  "forms": [
+    {
+      "id": "contact-form",
+      "action": "/contact",
+      "method": "POST",
+      "pageUrl": "https://example.com/contact",
+      "inputFields": [
+        {
+          "type": "text",
+          "name": "name",
+          "required": true,
+          "pageUrl": "https://example.com/contact"
+        },
+        {
+          "type": "email",
+          "name": "email",
+          "required": true,
+          "pageUrl": "https://example.com/contact"
+        },
+        {
+          "type": "textarea",
+          "name": "message",
+          "required": false,
+          "pageUrl": "https://example.com/contact"
+        }
+      ]
+    }
+  ],
+  "buttons": [
+    {
+      "type": "submit",
+      "text": "Send Message",
+      "pageUrl": "https://example.com/contact",
+      "formId": "contact-form"
+    },
+    {
+      "type": "button",
+      "text": "Learn More",
+      "pageUrl": "https://example.com/about"
+    }
+  ],
+  "inputFields": [
+    {
+      "type": "text",
+      "name": "name",
+      "required": true,
+      "pageUrl": "https://example.com/contact",
+      "formId": "contact-form"
+    },
+    {
+      "type": "email",
+      "name": "email",
+      "required": true,
+      "pageUrl": "https://example.com/contact",
+      "formId": "contact-form"
+    },
+    {
+      "type": "textarea",
+      "name": "message",
+      "required": false,
+      "pageUrl": "https://example.com/contact",
+      "formId": "contact-form"
+    }
+  ]
+}
+

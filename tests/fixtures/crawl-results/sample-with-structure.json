@@ -1,0 +1,68 @@
+{
+  "summary": {
+    "totalPages": 6,
+    "totalForms": 0,
+    "totalButtons": 0,
+    "totalInputFields": 0,
+    "errors": 0,
+    "skipped": 0,
+    "interrupted": false,
+    "startTime": "2024-01-01T00:00:00Z",
+    "endTime": "2024-01-01T00:05:00Z",
+    "duration": 300
+  },
+  "pages": [
+    {
+      "url": "https://example.com",
+      "status": 200,
+      "title": "Home",
+      "discoveredAt": "2024-01-01T00:00:00Z",
+      "processedAt": "2024-01-01T00:00:01Z",
+      "links": ["https://example.com/products", "https://example.com/about", "https://example.com/contact"]
+    },
+    {
+      "url": "https://example.com/products",
+      "status": 200,
+      "title": "Products",
+      "discoveredAt": "2024-01-01T00:00:02Z",
+      "processedAt": "2024-01-01T00:00:03Z",
+      "links": ["https://example.com/products/item1", "https://example.com/products/item2"]
+    },
+    {
+      "url": "https://example.com/products/item1",
+      "status": 200,
+      "title": "Product 1",
+      "discoveredAt": "2024-01-01T00:00:04Z",
+      "processedAt": "2024-01-01T00:00:05Z",
+      "links": ["https://example.com/products"]
+    },
+    {
+      "url": "https://example.com/products/item2",
+      "status": 200,
+      "title": "Product 2",
+      "discoveredAt": "2024-01-01T00:00:06Z",
+      "processedAt": "2024-01-01T00:00:07Z",
+      "links": ["https://example.com/products"]
+    },
+    {
+      "url": "https://example.com/about",
+      "status": 200,
+      "title": "About",
+      "discoveredAt": "2024-01-01T00:00:08Z",
+      "processedAt": "2024-01-01T00:00:09Z",
+      "links": ["https://example.com"]
+    },
+    {
+      "url": "https://example.com/contact",
+      "status": 200,
+      "title": "Contact",
+      "discoveredAt": "2024-01-01T00:00:10Z",
+      "processedAt": "2024-01-01T00:00:11Z",
+      "links": ["https://example.com"]
+    }
+  ],
+  "forms": [],
+  "buttons": [],
+  "inputFields": []
+}
+
