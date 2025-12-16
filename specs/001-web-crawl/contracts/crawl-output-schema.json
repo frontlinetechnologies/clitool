@@ -1,0 +1,224 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Web Crawler Output Schema",
+  "description": "JSON schema for crawl command output",
+  "type": "object",
+  "required": ["summary", "pages"],
+  "properties": {
+    "summary": {
+      "type": "object",
+      "required": ["totalPages", "totalForms", "totalButtons", "totalInputFields", "errors", "skipped", "interrupted", "startTime"],
+      "properties": {
+        "totalPages": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of pages discovered"
+        },
+        "totalForms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of forms found"
+        },
+        "totalButtons": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of buttons found"
+        },
+        "totalInputFields": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of input fields found"
+        },
+        "errors": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of pages that could not be accessed"
+        },
+        "skipped": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of pages skipped (robots.txt, auth, etc.)"
+        },
+        "interrupted": {
+          "type": "boolean",
+          "description": "Whether crawl was interrupted before completion"
+        },
+        "startTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp when crawl started"
+        },
+        "endTime": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "ISO 8601 timestamp when crawl completed (null if interrupted)"
+        },
+        "duration": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Crawl duration in seconds (null if interrupted)"
+        }
+      }
+    },
+    "pages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["url", "status", "discoveredAt"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Normalized URL of the page"
+          },
+          "status": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 599,
+            "description": "HTTP status code"
+          },
+          "title": {
+            "type": ["string", "null"],
+            "description": "Page title from <title> tag"
+          },
+          "discoveredAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp when page was discovered"
+          },
+          "processedAt": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp when page was processed"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            },
+            "description": "Array of normalized URLs discovered on this page (same domain only)"
+          },
+          "error": {
+            "type": ["string", "null"],
+            "description": "Error message if page could not be accessed"
+          }
+        }
+      }
+    },
+    "forms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["action", "method", "pageUrl"],
+        "properties": {
+          "id": {
+            "type": ["string", "null"],
+            "description": "Form id attribute"
+          },
+          "action": {
+            "type": "string",
+            "description": "Form action URL (absolute or relative)"
+          },
+          "method": {
+            "type": "string",
+            "enum": ["GET", "POST", "PUT", "DELETE", "PATCH"],
+            "default": "GET",
+            "description": "HTTP method"
+          },
+          "pageUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL of the page containing this form"
+          },
+          "inputFields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/InputField"
+            },
+            "description": "Array of input fields within this form"
+          }
+        }
+      }
+    },
+    "buttons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "pageUrl"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["button", "submit", "reset"],
+            "description": "Button type"
+          },
+          "text": {
+            "type": ["string", "null"],
+            "description": "Button text/label content"
+          },
+          "id": {
+            "type": ["string", "null"],
+            "description": "Button id attribute"
+          },
+          "className": {
+            "type": ["string", "null"],
+            "description": "Button CSS class names"
+          },
+          "pageUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL of the page containing this button"
+          },
+          "formId": {
+            "type": ["string", "null"],
+            "description": "Associated form id if button is within a form"
+          }
+        }
+      }
+    },
+    "inputFields": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/InputField"
+      }
+    }
+  },
+  "definitions": {
+    "InputField": {
+      "type": "object",
+      "required": ["type", "pageUrl"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Input type (text, email, password, checkbox, radio, etc.)"
+        },
+        "name": {
+          "type": ["string", "null"],
+          "description": "Input name attribute"
+        },
+        "id": {
+          "type": ["string", "null"],
+          "description": "Input id attribute"
+        },
+        "required": {
+          "type": ["boolean", "null"],
+          "description": "Whether input has required attribute"
+        },
+        "placeholder": {
+          "type": ["string", "null"],
+          "description": "Placeholder text"
+        },
+        "pageUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the page containing this input"
+        },
+        "formId": {
+          "type": ["string", "null"],
+          "description": "Associated form id if input is within a form"
+        }
+      }
+    }
+  }
+}
+
