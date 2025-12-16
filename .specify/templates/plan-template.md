@@ -31,20 +31,7 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-Verify compliance with all constitution articles:
-
-- **Article I - Simplicity First**: Feature prioritizes simplicity, usable without documentation, intuitive command patterns
-- **Article II - Zero Configuration Start**: Feature works with minimal setup, sensible defaults, optional config files
-- **Article III - Transparent Operations**: Feature provides progress indicators, clear error messages, no silent failures
-- **Article IV - Playwright Compatibility**: Generated tests/output are valid, runnable Playwright scripts following best practices
-- **Article V - Modular Architecture**: Code organized into clear, independent modules with single responsibilities
-- **Article VI - Dependency Minimalism**: External dependencies justified and minimal, no unnecessary utilities
-- **Article VII - Cross-Platform Consistency**: Feature works identically on macOS, Linux, and Windows
-- **Article VIII - Test Coverage**: Code includes unit/integration/contract tests, minimum 80% coverage
-- **Article IX - Documentation as Code**: README updated, CLI help text provided, examples included
-- **Article X - Community-Friendly Development**: Code follows style guidelines, suitable for open-source contribution
-
-If any article is violated, document justification in Complexity Tracking section below.
+[Gates determined based on constitution file]
 
 ## Project Structure
 
