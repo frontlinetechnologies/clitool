@@ -66,20 +66,99 @@ crawl https://example.com | generate-docs --output docs.md
 cat crawl-results.json | npm run generate-docs
 cat crawl-results.json | node dist/cli/generate-docs.js
 
-# With AI descriptions (requires ANTHROPIC_API_KEY environment variable)
+# With AI descriptions (using environment variable)
 export ANTHROPIC_API_KEY=your-api-key
 npm run crawl https://example.com | npm run generate-docs -- --output docs.md
+
+# With AI descriptions (using command-line parameter)
+npm run crawl https://example.com | npm run generate-docs -- --anthropic-api-key your-api-key --output docs.md
 ```
 
 ### Generate Docs Options
 
 - `--output <file>`: Save documentation to file instead of stdout
+- `--anthropic-api-key <key>`: Anthropic API key for AI-generated page descriptions (overrides `ANTHROPIC_API_KEY` environment variable)
 
 The `generate-docs` command reads crawl results JSON from stdin and generates comprehensive Markdown documentation including:
 - Site structure and navigation paths
 - Critical user flows (login, checkout, form submissions)
 - Page details with forms, buttons, and input fields
-- AI-generated page descriptions (when API key is available)
+- AI-generated page descriptions (when API key is available via `--anthropic-api-key` parameter or `ANTHROPIC_API_KEY` environment variable)
+
+### Generate Tests
+
+```bash
+# Using npm script (recommended for development)
+npm run crawl https://example.com | npm run generate-tests
+npm run crawl https://example.com | npm run generate-tests -- --output-dir ./e2e-tests
+
+# Using node directly
+node dist/cli/crawl.js https://example.com | node dist/cli/generate-tests.js
+node dist/cli/crawl.js https://example.com | node dist/cli/generate-tests.js --output-dir ./e2e-tests
+
+# After npm link (makes commands available globally)
+crawl https://example.com | generate-tests
+crawl https://example.com | generate-tests --output-dir ./e2e-tests
+
+# Generate from existing crawl results file
+cat crawl-results.json | npm run generate-tests
+cat crawl-results.json | node dist/cli/generate-tests.js
+
+# With AI enhancement (using environment variable)
+export ANTHROPIC_API_KEY=your-api-key
+npm run crawl https://example.com | npm run generate-tests
+
+# With AI enhancement (using command-line parameter)
+npm run crawl https://example.com | npm run generate-tests -- --anthropic-api-key your-api-key
+```
+
+### Generate Tests Options
+
+- `--output-dir <directory>`: Output directory for test files (default: `./tests/generated/`)
+- `--anthropic-api-key <key>`: Anthropic API key for AI-enhanced test scenarios (overrides `ANTHROPIC_API_KEY` environment variable)
+
+The `generate-tests` command reads crawl results JSON from stdin and generates Playwright end-to-end test scripts including:
+- Test files organized by user flow (one file per flow)
+- Navigation tests for discovered pages
+- Form submission tests with realistic test data
+- Login flow tests (when email/password fields detected)
+- Checkout flow tests (when payment fields detected)
+- Specific scenario tests (e.g., coupon codes when detected)
+- AI-enhanced test scenarios and assertions (when API key is available via `--anthropic-api-key` parameter or `ANTHROPIC_API_KEY` environment variable)
+
+**Example Generated Test File**:
+
+```typescript
+import { test, expect } from '@playwright/test';
+
+test.describe('Login Flow', () => {
+  test('should navigate to login page', async ({ page }) => {
+    await page.goto('https://example.com/login');
+    await expect(page).toHaveTitle(/Login/);
+  });
+
+  test('should fill login form and submit', async ({ page }) => {
+    await page.goto('https://example.com/login');
+    await page.getByLabel('Email').fill('test.user@example.com');
+    await page.getByLabel('Password').fill('TestPassword123!');
+    await page.getByRole('button', { name: 'Sign In' }).click();
+    await expect(page).toHaveURL(/dashboard/);
+  });
+});
+```
+
+**Running Generated Tests**:
+
+```bash
+# Install Playwright if not already installed
+npx playwright install
+
+# Run all generated tests
+npx playwright test tests/generated/
+
+# Run specific test file
+npx playwright test tests/generated/login-flow.spec.ts
+```
 
 ## Development
 
@@ -120,9 +199,20 @@ npm run lint:fix
 - Generates human-readable Markdown documentation from crawl results
 - Identifies site structure and navigation paths
 - Detects critical user flows (login, checkout, form submissions)
-- Provides AI-powered page descriptions (requires ANTHROPIC_API_KEY)
+- Provides AI-powered page descriptions (requires `--anthropic-api-key` parameter or `ANTHROPIC_API_KEY` environment variable)
 - Handles empty results gracefully
 - Outputs to stdout or file
+
+### Generate Tests Command
+
+- Generates Playwright end-to-end test scripts from crawl results
+- Organizes tests by user flow (one file per flow)
+- Detects and tests critical flows (login, checkout, form submissions)
+- Generates realistic test data (emails, passwords, coupon codes, etc.)
+- Identifies specific scenarios (coupon codes, promo codes)
+- Provides AI-enhanced test scenarios and assertions (requires `--anthropic-api-key` parameter or `ANTHROPIC_API_KEY` environment variable)
+- Handles empty results gracefully
+- Outputs valid, runnable Playwright test files
 
 ## Requirements
 

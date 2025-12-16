@@ -167,11 +167,14 @@ export class Crawler {
 
       // Update summary
       if (result.page.error) {
-        incrementErrors(summary);
+        const updatedSummary = incrementErrors(summary);
+        Object.assign(summary, updatedSummary);
       } else if (result.page.status >= 200 && result.page.status < 300) {
-        incrementTotalPages(summary);
+        const updatedSummary = incrementTotalPages(summary);
+        Object.assign(summary, updatedSummary);
       } else if (result.page.status >= 400) {
-        incrementErrors(summary);
+        const updatedSummary = incrementErrors(summary);
+        Object.assign(summary, updatedSummary);
       }
 
       this.pages.push(result.page);
@@ -233,6 +236,8 @@ export class Crawler {
     summary.totalForms = this.forms.length;
     summary.totalButtons = this.buttons.length;
     summary.totalInputFields = this.inputFields.length;
+    // Sync totalPages with actual pages array length (in case increments were missed)
+    summary.totalPages = this.pages.length;
 
     return {
       summary,

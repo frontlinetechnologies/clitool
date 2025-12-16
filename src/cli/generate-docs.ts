@@ -19,10 +19,12 @@ program
   .name('generate-docs')
   .description('Generate human-readable Markdown documentation from crawl results')
   .option('--output <file>', 'Save documentation to file instead of stdout')
+  .option('--anthropic-api-key <key>', 'Anthropic API key for AI-generated page descriptions (overrides ANTHROPIC_API_KEY environment variable)')
   .addHelpText('after', `
 Examples:
   $ crawl https://example.com | generate-docs
   $ crawl https://example.com | generate-docs --output docs.md
+  $ crawl https://example.com | generate-docs --anthropic-api-key your-api-key --output docs.md
   $ cat crawl-results.json | generate-docs
 
 The documentation generator will:
@@ -30,6 +32,7 @@ The documentation generator will:
   - Generate Markdown documentation describing site structure
   - Output to stdout or save to specified file
   - Handle empty results gracefully
+  - Use AI-generated page descriptions if API key is provided (via --anthropic-api-key or ANTHROPIC_API_KEY environment variable)
 
 Input Format:
   Expects JSON matching the crawl command output schema:
@@ -47,7 +50,7 @@ Input Format:
       const crawlResults = await parseCrawlResults();
 
       // Generate documentation
-      const documentation = await generateDocumentation(crawlResults);
+      const documentation = await generateDocumentation(crawlResults, options.anthropicApiKey);
 
       // Format as Markdown
       const markdown = formatAsMarkdown(documentation);
