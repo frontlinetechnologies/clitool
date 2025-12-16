@@ -20,15 +20,16 @@ export interface CrawlResults {
 /**
  * Formats crawl results as JSON.
  * Always includes summary and element arrays (can be empty).
- * Pages and detailed element data only included in verbose mode.
+ * The verbose flag is reserved for future use to include additional detail fields.
  */
-export function formatAsJSON(results: CrawlResults, verbose: boolean = false): string {
+export function formatAsJSON(results: CrawlResults, _verbose: boolean = false): string {
+  // Always include arrays - they are required for downstream commands (generate-docs, generate-tests)
   const output: CrawlResults = {
     summary: results.summary,
-    pages: verbose ? results.pages : [],
-    forms: verbose ? results.forms : [],
-    buttons: verbose ? results.buttons : [],
-    inputFields: verbose ? results.inputFields : [],
+    pages: results.pages,
+    forms: results.forms,
+    buttons: results.buttons,
+    inputFields: results.inputFields,
   };
 
   return JSON.stringify(output, null, 2);
