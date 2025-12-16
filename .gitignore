@@ -53,3 +53,6 @@ tests/generated/
 tests/generated-*/
 
 .claude/settings.local.json
+
+# Testarion config files (may contain API keys)
+.testarion/

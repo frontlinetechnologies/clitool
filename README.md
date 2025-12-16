@@ -77,13 +77,14 @@ npm run crawl https://example.com | npm run generate-docs -- --anthropic-api-key
 ### Generate Docs Options
 
 - `--output <file>`: Save documentation to file instead of stdout
-- `--anthropic-api-key <key>`: Anthropic API key for AI-generated page descriptions (overrides `ANTHROPIC_API_KEY` environment variable)
+- `--anthropic-api-key <key>`: Anthropic API key for AI-generated page descriptions
+- `--verbose`: Show detailed information including API key configuration guidance
 
 The `generate-docs` command reads crawl results JSON from stdin and generates comprehensive Markdown documentation including:
 - Site structure and navigation paths
 - Critical user flows (login, checkout, form submissions)
 - Page details with forms, buttons, and input fields
-- AI-generated page descriptions (when API key is available via `--anthropic-api-key` parameter or `ANTHROPIC_API_KEY` environment variable)
+- AI-generated page descriptions (when API key is available)
 
 ### Generate Tests
 
@@ -115,7 +116,8 @@ npm run crawl https://example.com | npm run generate-tests -- --anthropic-api-ke
 ### Generate Tests Options
 
 - `--output-dir <directory>`: Output directory for test files (default: `./tests/generated/`)
-- `--anthropic-api-key <key>`: Anthropic API key for AI-enhanced test scenarios (overrides `ANTHROPIC_API_KEY` environment variable)
+- `--anthropic-api-key <key>`: Anthropic API key for AI-enhanced test scenarios
+- `--verbose`: Show detailed information including API key configuration guidance
 
 The `generate-tests` command reads crawl results JSON from stdin and generates Playwright end-to-end test scripts including:
 - Test files organized by user flow (one file per flow)
@@ -213,6 +215,57 @@ npm run lint:fix
 - Provides AI-enhanced test scenarios and assertions (requires `--anthropic-api-key` parameter or `ANTHROPIC_API_KEY` environment variable)
 - Handles empty results gracefully
 - Outputs valid, runnable Playwright test files
+
+## API Key Configuration
+
+The AI-enhanced features require an Anthropic API key. The tool supports three methods for providing your API key, checked in this priority order:
+
+### Method 1: Command-Line Parameter (Highest Priority)
+
+```bash
+generate-tests --anthropic-api-key sk-ant-api03-... < input.json
+```
+
+### Method 2: Environment Variable
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-api03-...
+generate-tests < input.json
+```
+
+### Method 3: Configuration File (Persistent)
+
+**Project-level config** (recommended for project-specific keys):
+
+```bash
+mkdir -p .testarion
+echo '{"anthropicApiKey": "sk-ant-api03-..."}' > .testarion/config.json
+chmod 600 .testarion/config.json
+```
+
+**Global config** (recommended for default key):
+
+```bash
+mkdir -p ~/.testarion
+echo '{"anthropicApiKey": "sk-ant-api03-..."}' > ~/.testarion/config.json
+chmod 600 ~/.testarion/config.json
+```
+
+Once configured, the tool automatically uses your key:
+
+```bash
+generate-tests < input.json  # Key automatically loaded from config file
+```
+
+### Auto-Save Prompt
+
+When you provide an API key via CLI or environment variable, the tool offers to save it to a config file (once per session). This prompt only appears when stdin is a TTY and no config file exists.
+
+### Security Notes
+
+- Config files are automatically set to 600 permissions (owner read/write only)
+- Add `.testarion/` to your `.gitignore` to avoid committing API keys
+- API keys must start with `sk-ant-` prefix (format is validated)
 
 ## Requirements
 
