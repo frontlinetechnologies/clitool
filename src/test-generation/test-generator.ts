@@ -27,12 +27,16 @@ import { generatePlaywrightCode } from './playwright-codegen';
  *
  * @param crawlResults - Parsed crawl results input
  * @param outputDirectory - Directory where test files will be saved
+ * @param apiKey - Optional API key for AI features. If provided, takes precedence over environment variable. Reserved for future AI integration.
  * @returns Generated test suite
  */
 export async function generateTestSuite(
   crawlResults: CrawlResultsInput,
   outputDirectory: string,
+  apiKey?: string,
 ): Promise<GeneratedTestSuite> {
+  // apiKey parameter is reserved for future AI integration
+  void apiKey;
   // Handle empty results
   if (!crawlResults.pages || crawlResults.pages.length === 0) {
     return generateEmptyTestSuite(outputDirectory);

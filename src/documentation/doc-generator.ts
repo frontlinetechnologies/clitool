@@ -14,9 +14,10 @@ import { analyzePage } from '../ai/anthropic-client';
  * Handles empty results per FR-015 by generating minimal documentation with message.
  *
  * @param crawlResults - Parsed crawl results input
+ * @param apiKey - Optional API key for AI features. If provided, takes precedence over environment variable.
  * @returns Generated documentation object
  */
-export async function generateDocumentation(crawlResults: CrawlResultsInput): Promise<Documentation> {
+export async function generateDocumentation(crawlResults: CrawlResultsInput, apiKey?: string): Promise<Documentation> {
   // Handle empty results
   if (!crawlResults.pages || crawlResults.pages.length === 0) {
     return generateEmptyDocumentation();
@@ -35,7 +36,7 @@ export async function generateDocumentation(crawlResults: CrawlResultsInput): Pr
   const criticalFlows = detectCriticalFlows(crawlResults.pages, crawlResults.forms || []);
 
   // Generate page details with AI descriptions (Phase 6)
-  const pageDetails = await generatePageDetailsWithAI(crawlResults);
+  const pageDetails = await generatePageDetailsWithAI(crawlResults, apiKey);
 
   // Update summary with navigation paths and flows count
   summary.navigationPathsCount = navigationPaths.length;
@@ -106,8 +107,11 @@ function generateSummary(crawlResults: CrawlResultsInput): DocumentationSummary 
  * Per FR-008: falls back to structural descriptions if API unavailable.
  * Per FR-009: handles API unavailability gracefully.
  * Per FR-018: processes sequentially to respect API rate limits.
+ * 
+ * @param crawlResults - Parsed crawl results input
+ * @param apiKey - Optional API key for AI features. If provided, takes precedence over environment variable.
  */
-async function generatePageDetailsWithAI(crawlResults: CrawlResultsInput): Promise<PageDetail[]> {
+async function generatePageDetailsWithAI(crawlResults: CrawlResultsInput, apiKey?: string): Promise<PageDetail[]> {
   const pageDetails: PageDetail[] = [];
 
   // Process pages sequentially to respect API rate limits (FR-018)
@@ -141,7 +145,7 @@ async function generatePageDetailsWithAI(crawlResults: CrawlResultsInput): Promi
     // Try to get AI-generated description (FR-007, FR-008, FR-009)
     let description: string | undefined;
     try {
-      const aiDescription = await analyzePage(page.url, page.title);
+      const aiDescription = await analyzePage(page.url, page.title, undefined, apiKey);
       if (aiDescription) {
         description = aiDescription;
       } else {

@@ -18,10 +18,12 @@ program
   .name('generate-tests')
   .description('Generate Playwright end-to-end test scripts from crawl results')
   .option('--output-dir <directory>', 'Output directory for test files', './tests/generated/')
+  .option('--anthropic-api-key <key>', 'Anthropic API key for AI-enhanced test scenarios (overrides ANTHROPIC_API_KEY environment variable)')
   .addHelpText('after', `
 Examples:
   $ crawl https://example.com | generate-tests
   $ crawl https://example.com | generate-tests --output-dir ./e2e-tests
+  $ crawl https://example.com | generate-tests --anthropic-api-key your-api-key
   $ cat crawl-results.json | generate-tests
 
 The test generator will:
@@ -30,6 +32,7 @@ The test generator will:
   - Generate Playwright test files (one file per flow)
   - Save tests to output directory (default: ./tests/generated/)
   - Handle empty results gracefully
+  - Use AI-enhanced test scenarios if API key is provided (via --anthropic-api-key or ANTHROPIC_API_KEY environment variable)
 
 Input Format:
   Expects JSON matching the crawl command output schema:
@@ -73,7 +76,7 @@ Input Format:
       }
 
       // Generate test suite
-      const testSuite = await generateTestSuite(crawlResults, outputDir);
+      const testSuite = await generateTestSuite(crawlResults, outputDir, options.anthropicApiKey);
 
       // Write test files
       for (const testFile of testSuite.testFiles) {

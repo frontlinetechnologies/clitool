@@ -121,7 +121,9 @@ function generateAssertion(assertion: Assertion, indent: number): string[] {
 
   switch (assertion.type) {
     case 'url':
-      lines.push(`${indentStr}await expect(page).toHaveURL(/${escapeRegex(assertion.expected)}/);`);
+      // Use string-based RegExp to avoid issues with trailing slashes in regex literals
+      const urlPattern = escapeRegexForLiteral(assertion.expected);
+      lines.push(`${indentStr}await expect(page).toHaveURL(new RegExp('${urlPattern}'));`);
       break;
 
     case 'title':
@@ -169,12 +171,32 @@ function generateLocator(target: string): string {
 }
 
 /**
- * Escapes special regex characters in a string.
+ * Escapes special regex characters in a string for use in regex literals /.../.
+ * Forward slashes are NOT escaped since they don't need escaping in regex literals.
  *
  * @param str - String to escape
  * @returns Escaped string
  */
 function escapeRegex(str: string): string {
+  // Escape all regex special characters except forward slash
+  // Forward slash doesn't need escaping in regex literals /.../
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Escapes special regex characters and single quotes for use in RegExp constructor string.
+ * This handles trailing slashes correctly by escaping forward slashes.
+ *
+ * @param str - String to escape
+ * @returns Escaped string safe for RegExp constructor
+ */
+function escapeRegexForLiteral(str: string): string {
+  // Escape single quotes for the string literal
+  // Escape backslashes first, then forward slashes, then other regex special chars
+  return str
+    .replace(/\\/g, '\\\\')  // Escape backslashes first
+    .replace(/\//g, '\\/')    // Escape forward slashes
+    .replace(/'/g, "\\'")     // Escape single quotes
+    .replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape other regex special chars
 }
 

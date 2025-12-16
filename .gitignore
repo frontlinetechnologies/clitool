@@ -12,6 +12,7 @@ build/
 # Testing
 coverage/
 .nyc_output/
+test-results/
 
 # Environment variables
 .env
@@ -38,4 +39,16 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# Generated files
+# Crawl results (root directory only)
+/crawl-results*.json
+/crawl-results-verbose.json
+
+# Generated documentation (root directory only)
+/docs.md
+
+# Generated test files
+tests/generated/
+tests/generated-*/
 

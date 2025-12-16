@@ -66,20 +66,24 @@ crawl https://example.com | generate-docs --output docs.md
 cat crawl-results.json | npm run generate-docs
 cat crawl-results.json | node dist/cli/generate-docs.js
 
-# With AI descriptions (requires ANTHROPIC_API_KEY environment variable)
+# With AI descriptions (using environment variable)
 export ANTHROPIC_API_KEY=your-api-key
 npm run crawl https://example.com | npm run generate-docs -- --output docs.md
+
+# With AI descriptions (using command-line parameter)
+npm run crawl https://example.com | npm run generate-docs -- --anthropic-api-key your-api-key --output docs.md
 ```
 
 ### Generate Docs Options
 
 - `--output <file>`: Save documentation to file instead of stdout
+- `--anthropic-api-key <key>`: Anthropic API key for AI-generated page descriptions (overrides `ANTHROPIC_API_KEY` environment variable)
 
 The `generate-docs` command reads crawl results JSON from stdin and generates comprehensive Markdown documentation including:
 - Site structure and navigation paths
 - Critical user flows (login, checkout, form submissions)
 - Page details with forms, buttons, and input fields
-- AI-generated page descriptions (when API key is available)
+- AI-generated page descriptions (when API key is available via `--anthropic-api-key` parameter or `ANTHROPIC_API_KEY` environment variable)
 
 ### Generate Tests
 
@@ -100,14 +104,18 @@ crawl https://example.com | generate-tests --output-dir ./e2e-tests
 cat crawl-results.json | npm run generate-tests
 cat crawl-results.json | node dist/cli/generate-tests.js
 
-# With AI enhancement (requires ANTHROPIC_API_KEY environment variable)
+# With AI enhancement (using environment variable)
 export ANTHROPIC_API_KEY=your-api-key
 npm run crawl https://example.com | npm run generate-tests
+
+# With AI enhancement (using command-line parameter)
+npm run crawl https://example.com | npm run generate-tests -- --anthropic-api-key your-api-key
 ```
 
 ### Generate Tests Options
 
 - `--output-dir <directory>`: Output directory for test files (default: `./tests/generated/`)
+- `--anthropic-api-key <key>`: Anthropic API key for AI-enhanced test scenarios (overrides `ANTHROPIC_API_KEY` environment variable)
 
 The `generate-tests` command reads crawl results JSON from stdin and generates Playwright end-to-end test scripts including:
 - Test files organized by user flow (one file per flow)
@@ -116,7 +124,7 @@ The `generate-tests` command reads crawl results JSON from stdin and generates P
 - Login flow tests (when email/password fields detected)
 - Checkout flow tests (when payment fields detected)
 - Specific scenario tests (e.g., coupon codes when detected)
-- AI-enhanced test scenarios and assertions (when API key is available)
+- AI-enhanced test scenarios and assertions (when API key is available via `--anthropic-api-key` parameter or `ANTHROPIC_API_KEY` environment variable)
 
 **Example Generated Test File**:
 
@@ -191,7 +199,7 @@ npm run lint:fix
 - Generates human-readable Markdown documentation from crawl results
 - Identifies site structure and navigation paths
 - Detects critical user flows (login, checkout, form submissions)
-- Provides AI-powered page descriptions (requires ANTHROPIC_API_KEY)
+- Provides AI-powered page descriptions (requires `--anthropic-api-key` parameter or `ANTHROPIC_API_KEY` environment variable)
 - Handles empty results gracefully
 - Outputs to stdout or file
 
@@ -202,7 +210,7 @@ npm run lint:fix
 - Detects and tests critical flows (login, checkout, form submissions)
 - Generates realistic test data (emails, passwords, coupon codes, etc.)
 - Identifies specific scenarios (coupon codes, promo codes)
-- Provides AI-enhanced test scenarios and assertions (requires ANTHROPIC_API_KEY)
+- Provides AI-enhanced test scenarios and assertions (requires `--anthropic-api-key` parameter or `ANTHROPIC_API_KEY` environment variable)
 - Handles empty results gracefully
 - Outputs valid, runnable Playwright test files
 

@@ -15,23 +15,35 @@ export function resetClient(): void {
 }
 
 /**
- * Initializes the Anthropic API client with API key from environment variable.
+ * Initializes the Anthropic API client with API key from parameter or environment variable.
  * Returns null if API key is not available or initialization fails.
+ * 
+ * @param apiKey - Optional API key. If provided, takes precedence over environment variable.
  */
-export function initializeClient(): Anthropic | null {
-  if (client !== null) {
+export function initializeClient(apiKey?: string): Anthropic | null {
+  if (client !== null && !apiKey) {
     return client;
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
+  const keyToUse = apiKey || process.env.ANTHROPIC_API_KEY;
+  if (!keyToUse) {
     return null;
   }
 
   try {
-    client = new Anthropic({
-      apiKey,
-    });
+    // If apiKey parameter is provided, create a new client instance
+    // Otherwise, reuse cached client if available
+    if (apiKey) {
+      return new Anthropic({
+        apiKey: keyToUse,
+      });
+    }
+    
+    if (client === null) {
+      client = new Anthropic({
+        apiKey: keyToUse,
+      });
+    }
     return client;
   } catch (error) {
     // Gracefully handle initialization errors
@@ -46,14 +58,16 @@ export function initializeClient(): Anthropic | null {
  * @param pageUrl - URL of the page to analyze
  * @param pageTitle - Title of the page (optional)
  * @param pageContent - HTML content or text content of the page (optional)
+ * @param apiKey - Optional API key. If provided, takes precedence over environment variable.
  * @returns Promise resolving to description string or null on failure
  */
 export async function analyzePage(
   pageUrl: string,
   pageTitle?: string,
   pageContent?: string,
+  apiKey?: string,
 ): Promise<string | null> {
-  const apiClient = initializeClient();
+  const apiClient = initializeClient(apiKey);
   if (!apiClient) {
     return null;
   }
@@ -125,14 +139,16 @@ export interface AITestScenarioSuggestion {
  * @param flowType - Type of flow (login, checkout, form-submission)
  * @param flowPages - Array of page URLs in the flow
  * @param formFields - Description of form fields
+ * @param apiKey - Optional API key. If provided, takes precedence over environment variable.
  * @returns Promise resolving to test scenario suggestions or null on failure
  */
 export async function analyzeFlowForTests(
   flowType: string,
   flowPages: string[],
   formFields: string[],
+  apiKey?: string,
 ): Promise<AITestScenarioSuggestion[] | null> {
-  const apiClient = initializeClient();
+  const apiClient = initializeClient(apiKey);
   if (!apiClient) {
     return null;
   }
@@ -227,13 +243,15 @@ function parseTestSuggestions(response: string): AITestScenarioSuggestion[] | nu
  *
  * @param fieldType - Type of the field (email, password, text, etc.)
  * @param context - Additional context about the field (name, placeholder, etc.)
+ * @param apiKey - Optional API key. If provided, takes precedence over environment variable.
  * @returns Promise resolving to enhanced test data or null on failure
  */
 export async function generateEnhancedTestData(
   fieldType: string,
   context: string,
+  apiKey?: string,
 ): Promise<string | null> {
-  const apiClient = initializeClient();
+  const apiClient = initializeClient(apiKey);
   if (!apiClient) {
     return null;
   }
@@ -267,8 +285,10 @@ Respond with just the value, no explanation. For example, for an email field, re
 /**
  * Checks if the AI client is available.
  * Useful for determining whether to attempt AI enhancement.
+ * 
+ * @param apiKey - Optional API key. If provided, takes precedence over environment variable.
  */
-export function isAIAvailable(): boolean {
-  return initializeClient() !== null;
+export function isAIAvailable(apiKey?: string): boolean {
+  return initializeClient(apiKey) !== null;
 }
 
