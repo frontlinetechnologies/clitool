@@ -64,7 +64,7 @@ describe('Playwright Code Generator', () => {
       expect(code).toContain("test('should navigate to home page', async ({ page }) => {");
       expect(code).toContain("await page.goto('https://example.com');");
       expect(code).toContain("await page.waitForLoadState('networkidle');");
-      expect(code).toContain("await expect(page).toHaveURL(/example\\.com/);");
+      expect(code).toContain("await expect(page).toHaveURL(new RegExp('example\\.com'));");
       expect(code).toContain("await expect(page).toHaveTitle(/Example/);");
       expect(code).toContain('});');
     });

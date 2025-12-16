@@ -197,6 +197,6 @@ function escapeRegexForLiteral(str: string): string {
     .replace(/\\/g, '\\\\')  // Escape backslashes first
     .replace(/\//g, '\\/')    // Escape forward slashes
     .replace(/'/g, "\\'")     // Escape single quotes
-    .replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape other regex special chars
+    .replace(/[.*+?^${}()|[\]]/g, '\\$&'); // Escape other regex special chars
 }
 

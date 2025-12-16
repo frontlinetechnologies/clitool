@@ -20,6 +20,8 @@ import { detectCriticalFlows } from '../documentation/flow-detector';
 import { generateFlowFilename, generateNavigationFilename, generateEmptyResultsFilename } from './test-file-organizer';
 import { generateTestData, generateTestDataForField, generateCouponCode } from './test-data-generator';
 import { generatePlaywrightCode } from './playwright-codegen';
+import { analyzeFlowForTests, AITestScenarioSuggestion } from '../ai/anthropic-client';
+import { UserFlow } from '../documentation/models';
 
 /**
  * Generates test suite from crawl results.
@@ -35,14 +37,13 @@ export async function generateTestSuite(
   outputDirectory: string,
   apiKey?: string,
 ): Promise<GeneratedTestSuite> {
-  // apiKey parameter is reserved for future AI integration
-  void apiKey;
   // Handle empty results
   if (!crawlResults.pages || crawlResults.pages.length === 0) {
     return generateEmptyTestSuite(outputDirectory);
   }
 
   const testFiles: TestFile[] = [];
+  let aiEnhanced = false;
 
   // Detect critical flows (reuse flow-detector.ts per research.md)
   const flows = detectCriticalFlows(crawlResults.pages, crawlResults.forms || []);
@@ -58,8 +59,18 @@ export async function generateTestSuite(
     // Find scenarios that belong to this flow's pages
     const flowPageUrls = new Set(flow.pages.map((p) => p.url));
     const flowScenarios = scenarios.filter((s) => flowPageUrls.has(s.pageUrl));
-    
-    const testFile = generateFlowTestFile(flow, crawlResults, flowScenarios);
+
+    // Try to get AI-enhanced test scenarios if API key is available
+    let aiTestCases: TestCase[] = [];
+    if (apiKey) {
+      const aiSuggestions = await getAITestSuggestions(flow, crawlResults, apiKey);
+      if (aiSuggestions && aiSuggestions.length > 0) {
+        aiTestCases = aiSuggestions.map(convertAISuggestionToTestCase);
+        aiEnhanced = true;
+      }
+    }
+
+    const testFile = generateFlowTestFile(flow, crawlResults, flowScenarios, aiTestCases);
     testFiles.push(testFile);
   }
 
@@ -85,7 +96,7 @@ export async function generateTestSuite(
     flowsCovered: flows.length,
     scenariosDetected: scenarios.length,
     pagesTested: crawlResults.pages.length,
-    aiEnhanced: false,
+    aiEnhanced,
   };
 
   return {
@@ -340,12 +351,14 @@ function generateScenarioTestCase(scenario: SpecificScenario, crawlResults: Craw
  * @param flow - Detected user flow
  * @param crawlResults - Crawl results input
  * @param scenarios - Specific scenarios detected in this flow
+ * @param aiTestCases - AI-generated test cases to include
  * @returns Generated test file
  */
 function generateFlowTestFile(
   flow: import('../documentation/models').UserFlow,
   crawlResults: CrawlResultsInput,
   scenarios: SpecificScenario[] = [],
+  aiTestCases: TestCase[] = [],
 ): TestFile {
   const filename = generateFlowFilename(flow.name);
   const testCases: TestCase[] = [];
@@ -382,6 +395,9 @@ function generateFlowTestFile(
     const scenarioTestCase = generateScenarioTestCase(scenario, crawlResults);
     testCases.push(scenarioTestCase);
   }
+
+  // Add AI-generated test cases
+  testCases.push(...aiTestCases);
 
   const testFile: TestFile = {
     filename,
@@ -732,5 +748,89 @@ function generateButtonLocator(button: import('../models/button').Button): strin
     return `page.locator('#${button.id}')`;
   }
   return `page.getByRole('button')`;
+}
+
+/**
+ * Gets AI test suggestions for a flow.
+ *
+ * @param flow - The user flow to analyze
+ * @param crawlResults - Crawl results input
+ * @param apiKey - API key for AI service
+ * @returns Promise resolving to AI suggestions or null
+ */
+async function getAITestSuggestions(
+  flow: UserFlow,
+  crawlResults: CrawlResultsInput,
+  apiKey: string,
+): Promise<AITestScenarioSuggestion[] | null> {
+  const flowPageUrls = flow.pages.map((p) => p.url);
+  const formFields = getFormFieldsForFlow(flow, crawlResults);
+
+  return analyzeFlowForTests(flow.type, flowPageUrls, formFields, apiKey);
+}
+
+/**
+ * Extracts form field descriptions for a flow.
+ *
+ * @param flow - The user flow
+ * @param crawlResults - Crawl results input
+ * @returns Array of field descriptions
+ */
+function getFormFieldsForFlow(flow: UserFlow, crawlResults: CrawlResultsInput): string[] {
+  const flowPageUrls = new Set(flow.pages.map((p) => p.url));
+  const fields: string[] = [];
+
+  // Get fields from forms on flow pages
+  for (const form of crawlResults.forms || []) {
+    if (flowPageUrls.has(form.pageUrl)) {
+      for (const field of form.inputFields || []) {
+        const fieldDesc = field.name || field.placeholder || field.type;
+        if (fieldDesc) {
+          fields.push(fieldDesc);
+        }
+      }
+    }
+  }
+
+  // Get standalone input fields on flow pages
+  for (const field of crawlResults.inputFields || []) {
+    if (flowPageUrls.has(field.pageUrl)) {
+      const fieldDesc = field.name || field.placeholder || field.type;
+      if (fieldDesc && !fields.includes(fieldDesc)) {
+        fields.push(fieldDesc);
+      }
+    }
+  }
+
+  return fields;
+}
+
+/**
+ * Converts an AI suggestion to a TestCase object.
+ *
+ * @param suggestion - AI-generated test scenario suggestion
+ * @returns TestCase object
+ */
+function convertAISuggestionToTestCase(suggestion: AITestScenarioSuggestion): TestCase {
+  // Convert AI steps to TestStep objects
+  const steps: TestStep[] = suggestion.steps.map((stepDesc, index) => ({
+    action: 'wait' as const, // Default action - actual parsing would need more sophisticated logic
+    target: stepDesc,
+    order: index + 1,
+  }));
+
+  // Convert AI assertions to Assertion objects
+  const assertions: Assertion[] = suggestion.assertions.map((assertionDesc) => ({
+    type: 'visible' as const, // Default type - actual parsing would need more sophisticated logic
+    target: assertionDesc,
+    expected: assertionDesc,
+  }));
+
+  return {
+    name: suggestion.name,
+    type: 'ai-generated',
+    steps,
+    assertions,
+  };
 }
 

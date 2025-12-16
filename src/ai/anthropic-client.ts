@@ -5,6 +5,8 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 
+const DEFAULT_MODEL = 'claude-sonnet-4-5-20250929';
+
 let client: Anthropic | null = null;
 
 /**
@@ -77,7 +79,7 @@ export async function analyzePage(
     const prompt = buildAnalysisPrompt(pageUrl, pageTitle, pageContent);
 
     const response = await apiClient.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: DEFAULT_MODEL,
       max_tokens: 500,
       messages: [
         {
@@ -157,7 +159,7 @@ export async function analyzeFlowForTests(
     const prompt = buildTestAnalysisPrompt(flowType, flowPages, formFields);
 
     const response = await apiClient.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: DEFAULT_MODEL,
       max_tokens: 1000,
       messages: [
         {
@@ -261,7 +263,7 @@ export async function generateEnhancedTestData(
 Respond with just the value, no explanation. For example, for an email field, respond with just "john.doe@example.com".`;
 
     const response = await apiClient.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: DEFAULT_MODEL,
       max_tokens: 100,
       messages: [
         {

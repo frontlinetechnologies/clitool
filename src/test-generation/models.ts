@@ -32,7 +32,7 @@ export interface TestFile {
  */
 export interface TestCase {
   name: string; // Test case name/description
-  type: 'navigation' | 'form-submission' | 'scenario' | 'basic';
+  type: 'navigation' | 'form-submission' | 'scenario' | 'basic' | 'ai-generated';
   steps: TestStep[];
   assertions: Assertion[];
   testData?: TestData; // Test data used in this test case
