@@ -90,7 +90,7 @@ function generateEmptyDocumentation(): Documentation {
  */
 function generateSummary(crawlResults: CrawlResultsInput): DocumentationSummary {
   return {
-    totalPages: crawlResults.summary.totalPages,
+    totalPages: crawlResults.pages?.length || 0,
     totalForms: crawlResults.summary.totalForms,
     totalButtons: crawlResults.summary.totalButtons,
     totalInputFields: crawlResults.summary.totalInputFields,

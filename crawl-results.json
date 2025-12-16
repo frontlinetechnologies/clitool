@@ -1,0 +1,615 @@
+{
+  "summary": {
+    "totalPages": 0,
+    "totalForms": 7,
+    "totalButtons": 24,
+    "totalInputFields": 26,
+    "errors": 0,
+    "skipped": 0,
+    "interrupted": false,
+    "startTime": "2025-12-16T19:05:57.617Z",
+    "endTime": "2025-12-16T19:06:06.562Z",
+    "duration": 8
+  },
+  "pages": [
+    {
+      "url": "https://shorturl.net/",
+      "status": 200,
+      "discoveredAt": "2025-12-16T19:05:57.942Z",
+      "title": "shorturl.net - Fast & Simple URL Shortener",
+      "links": [
+        "https://shorturl.net/",
+        "https://shorturl.net/",
+        "https://shorturl.net/",
+        "https://shorturl.net/",
+        "https://shorturl.net/",
+        "https://shorturl.net/register/",
+        "https://shorturl.net/login/",
+        "https://shorturl.net/",
+        "https://shorturl.net/",
+        "https://shorturl.net/",
+        "https://shorturl.net/",
+        "https://shorturl.net/",
+        "https://shorturl.net/track/",
+        "https://shorturl.net/",
+        "https://shorturl.net/register/",
+        "https://shorturl.net/",
+        "https://shorturl.net/",
+        "https://shorturl.net/",
+        "https://shorturl.net/",
+        "https://shorturl.net/login/",
+        "https://shorturl.net/register/",
+        "https://shorturl.net/dashboard/",
+        "https://shorturl.net/",
+        "https://shorturl.net/"
+      ],
+      "processedAt": "2025-12-16T19:05:59.112Z"
+    },
+    {
+      "url": "https://shorturl.net/register/",
+      "status": 200,
+      "discoveredAt": "2025-12-16T19:05:59.443Z",
+      "title": "ShortUrl.net",
+      "links": [
+        "https://shorturl.net/",
+        "https://shorturl.net/login/",
+        "https://shorturl.net/"
+      ],
+      "processedAt": "2025-12-16T19:06:00.547Z"
+    },
+    {
+      "url": "https://shorturl.net/login/",
+      "status": 200,
+      "discoveredAt": "2025-12-16T19:06:00.944Z",
+      "title": "ShortUrl.net",
+      "links": [
+        "https://shorturl.net/",
+        "https://shorturl.net/forgot-password/",
+        "https://shorturl.net/register/",
+        "https://shorturl.net/"
+      ],
+      "processedAt": "2025-12-16T19:06:02.058Z"
+    },
+    {
+      "url": "https://shorturl.net/track/",
+      "status": 200,
+      "discoveredAt": "2025-12-16T19:06:02.444Z",
+      "title": "ShortUrl.net",
+      "links": [
+        "https://shorturl.net/"
+      ],
+      "processedAt": "2025-12-16T19:06:03.520Z"
+    },
+    {
+      "url": "https://shorturl.net/login/",
+      "status": 200,
+      "discoveredAt": "2025-12-16T19:06:03.945Z",
+      "title": "ShortUrl.net",
+      "links": [
+        "https://shorturl.net/",
+        "https://shorturl.net/forgot-password/",
+        "https://shorturl.net/register/",
+        "https://shorturl.net/"
+      ],
+      "processedAt": "2025-12-16T19:06:05.117Z"
+    },
+    {
+      "url": "https://shorturl.net/forgot-password/",
+      "status": 200,
+      "discoveredAt": "2025-12-16T19:06:05.446Z",
+      "title": "ShortUrl.net",
+      "links": [
+        "https://shorturl.net/",
+        "https://shorturl.net/login/",
+        "https://shorturl.net/"
+      ],
+      "processedAt": "2025-12-16T19:06:06.562Z"
+    }
+  ],
+  "forms": [
+    {
+      "id": "create-form",
+      "action": "https://shorturl.net/",
+      "method": "GET",
+      "pageUrl": "https://shorturl.net/",
+      "inputFields": [
+        {
+          "type": "url",
+          "id": "longUrl",
+          "required": true,
+          "placeholder": "https://example.com/your/long/url",
+          "pageUrl": "https://shorturl.net/",
+          "formId": "create-form"
+        }
+      ]
+    },
+    {
+      "id": "contact-form",
+      "action": "https://shorturl.net/",
+      "method": "GET",
+      "pageUrl": "https://shorturl.net/",
+      "inputFields": [
+        {
+          "type": "text",
+          "id": "contact-name",
+          "required": true,
+          "placeholder": "Name",
+          "pageUrl": "https://shorturl.net/",
+          "formId": "contact-form"
+        },
+        {
+          "type": "email",
+          "id": "contact-email",
+          "required": true,
+          "placeholder": "name@site.com",
+          "pageUrl": "https://shorturl.net/",
+          "formId": "contact-form"
+        },
+        {
+          "type": "textarea",
+          "id": "contact-message",
+          "required": true,
+          "placeholder": "Your message here...",
+          "pageUrl": "https://shorturl.net/",
+          "formId": "contact-form"
+        },
+        {
+          "type": "text",
+          "id": "contact-captcha",
+          "required": false,
+          "placeholder": "Enter the captcha",
+          "pageUrl": "https://shorturl.net/",
+          "formId": "contact-form"
+        }
+      ]
+    },
+    {
+      "action": "https://shorturl.net/register/",
+      "method": "GET",
+      "pageUrl": "https://shorturl.net/register/",
+      "inputFields": [
+        {
+          "type": "text",
+          "name": "name",
+          "id": "name",
+          "required": true,
+          "pageUrl": "https://shorturl.net/register/"
+        },
+        {
+          "type": "email",
+          "name": "email",
+          "id": "email",
+          "required": true,
+          "pageUrl": "https://shorturl.net/register/"
+        },
+        {
+          "type": "password",
+          "name": "password",
+          "id": "password",
+          "required": true,
+          "pageUrl": "https://shorturl.net/register/"
+        },
+        {
+          "type": "password",
+          "name": "password_confirmation",
+          "id": "password_confirmation",
+          "required": true,
+          "pageUrl": "https://shorturl.net/register/"
+        },
+        {
+          "type": "text",
+          "name": "captcha",
+          "id": "captcha",
+          "required": true,
+          "placeholder": "Enter the captcha",
+          "pageUrl": "https://shorturl.net/register/"
+        }
+      ]
+    },
+    {
+      "action": "https://shorturl.net/login/",
+      "method": "GET",
+      "pageUrl": "https://shorturl.net/login/",
+      "inputFields": [
+        {
+          "type": "email",
+          "name": "email",
+          "id": "email",
+          "required": true,
+          "pageUrl": "https://shorturl.net/login/"
+        },
+        {
+          "type": "password",
+          "name": "password",
+          "id": "password",
+          "required": true,
+          "pageUrl": "https://shorturl.net/login/"
+        },
+        {
+          "type": "checkbox",
+          "name": "remember",
+          "id": "remember_me",
+          "required": false,
+          "pageUrl": "https://shorturl.net/login/"
+        }
+      ]
+    },
+    {
+      "action": "https://shorturl.net/track",
+      "method": "POST",
+      "pageUrl": "https://shorturl.net/track/",
+      "inputFields": [
+        {
+          "type": "hidden",
+          "name": "_token",
+          "required": false,
+          "pageUrl": "https://shorturl.net/track/"
+        },
+        {
+          "type": "text",
+          "name": "code",
+          "required": true,
+          "placeholder": "zffqxc or http://shorturl.net/zffqxc",
+          "pageUrl": "https://shorturl.net/track/"
+        }
+      ]
+    },
+    {
+      "action": "https://shorturl.net/login",
+      "method": "GET",
+      "pageUrl": "https://shorturl.net/login",
+      "inputFields": [
+        {
+          "type": "email",
+          "name": "email",
+          "id": "email",
+          "required": true,
+          "pageUrl": "https://shorturl.net/login"
+        },
+        {
+          "type": "password",
+          "name": "password",
+          "id": "password",
+          "required": true,
+          "pageUrl": "https://shorturl.net/login"
+        },
+        {
+          "type": "checkbox",
+          "name": "remember",
+          "id": "remember_me",
+          "required": false,
+          "pageUrl": "https://shorturl.net/login"
+        }
+      ]
+    },
+    {
+      "action": "https://shorturl.net/forgot-password/",
+      "method": "GET",
+      "pageUrl": "https://shorturl.net/forgot-password/",
+      "inputFields": [
+        {
+          "type": "email",
+          "name": "email",
+          "id": "email",
+          "required": true,
+          "pageUrl": "https://shorturl.net/forgot-password/"
+        }
+      ]
+    }
+  ],
+  "buttons": [
+    {
+      "type": "submit",
+      "text": "Shorten URL",
+      "className": "btn btn-primary",
+      "pageUrl": "https://shorturl.net/",
+      "formId": "create-form"
+    },
+    {
+      "type": "button",
+      "text": "Copy",
+      "className": "btn",
+      "pageUrl": "https://shorturl.net/"
+    },
+    {
+      "type": "button",
+      "text": "Start for Free",
+      "className": "btn btn-outline btn-primary btn-block mt-auto",
+      "pageUrl": "https://shorturl.net/"
+    },
+    {
+      "type": "submit",
+      "text": "Send Message\n            Sending...",
+      "className": "btn btn-primary",
+      "pageUrl": "https://shorturl.net/",
+      "formId": "contact-form"
+    },
+    {
+      "type": "button",
+      "text": "System",
+      "pageUrl": "https://shorturl.net/"
+    },
+    {
+      "type": "button",
+      "text": "Light",
+      "pageUrl": "https://shorturl.net/"
+    },
+    {
+      "type": "button",
+      "text": "Dark",
+      "pageUrl": "https://shorturl.net/"
+    },
+    {
+      "type": "submit",
+      "text": "Register",
+      "className": "btn btn-primary w-full",
+      "pageUrl": "https://shorturl.net/register/"
+    },
+    {
+      "type": "button",
+      "text": "System",
+      "pageUrl": "https://shorturl.net/register/"
+    },
+    {
+      "type": "button",
+      "text": "Light",
+      "pageUrl": "https://shorturl.net/register/"
+    },
+    {
+      "type": "button",
+      "text": "Dark",
+      "pageUrl": "https://shorturl.net/register/"
+    },
+    {
+      "type": "submit",
+      "text": "Log in",
+      "className": "btn btn-primary w-full",
+      "pageUrl": "https://shorturl.net/login/"
+    },
+    {
+      "type": "button",
+      "text": "System",
+      "pageUrl": "https://shorturl.net/login/"
+    },
+    {
+      "type": "button",
+      "text": "Light",
+      "pageUrl": "https://shorturl.net/login/"
+    },
+    {
+      "type": "button",
+      "text": "Dark",
+      "pageUrl": "https://shorturl.net/login/"
+    },
+    {
+      "type": "submit",
+      "text": "View Stats",
+      "className": "btn btn-primary btn-block",
+      "pageUrl": "https://shorturl.net/track/"
+    },
+    {
+      "type": "submit",
+      "text": "Log in",
+      "className": "btn btn-primary w-full",
+      "pageUrl": "https://shorturl.net/login"
+    },
+    {
+      "type": "button",
+      "text": "System",
+      "pageUrl": "https://shorturl.net/login"
+    },
+    {
+      "type": "button",
+      "text": "Light",
+      "pageUrl": "https://shorturl.net/login"
+    },
+    {
+      "type": "button",
+      "text": "Dark",
+      "pageUrl": "https://shorturl.net/login"
+    },
+    {
+      "type": "submit",
+      "text": "Email Password Reset Link",
+      "className": "btn btn-primary w-full",
+      "pageUrl": "https://shorturl.net/forgot-password/"
+    },
+    {
+      "type": "button",
+      "text": "System",
+      "pageUrl": "https://shorturl.net/forgot-password/"
+    },
+    {
+      "type": "button",
+      "text": "Light",
+      "pageUrl": "https://shorturl.net/forgot-password/"
+    },
+    {
+      "type": "button",
+      "text": "Dark",
+      "pageUrl": "https://shorturl.net/forgot-password/"
+    }
+  ],
+  "inputFields": [
+    {
+      "type": "url",
+      "id": "longUrl",
+      "required": true,
+      "placeholder": "https://example.com/your/long/url",
+      "pageUrl": "https://shorturl.net/",
+      "formId": "create-form"
+    },
+    {
+      "type": "text",
+      "id": "contact-name",
+      "required": true,
+      "placeholder": "Name",
+      "pageUrl": "https://shorturl.net/",
+      "formId": "contact-form"
+    },
+    {
+      "type": "email",
+      "id": "contact-email",
+      "required": true,
+      "placeholder": "name@site.com",
+      "pageUrl": "https://shorturl.net/",
+      "formId": "contact-form"
+    },
+    {
+      "type": "textarea",
+      "id": "contact-message",
+      "required": true,
+      "placeholder": "Your message here...",
+      "pageUrl": "https://shorturl.net/",
+      "formId": "contact-form"
+    },
+    {
+      "type": "text",
+      "id": "contact-captcha",
+      "required": false,
+      "placeholder": "Enter the captcha",
+      "pageUrl": "https://shorturl.net/",
+      "formId": "contact-form"
+    },
+    {
+      "type": "checkbox",
+      "id": "my-drawer",
+      "required": false,
+      "pageUrl": "https://shorturl.net/"
+    },
+    {
+      "type": "text",
+      "id": "shortUrl",
+      "required": false,
+      "pageUrl": "https://shorturl.net/"
+    },
+    {
+      "type": "radio",
+      "name": "faq",
+      "required": false,
+      "pageUrl": "https://shorturl.net/"
+    },
+    {
+      "type": "radio",
+      "name": "faq",
+      "required": false,
+      "pageUrl": "https://shorturl.net/"
+    },
+    {
+      "type": "radio",
+      "name": "faq",
+      "required": false,
+      "pageUrl": "https://shorturl.net/"
+    },
+    {
+      "type": "radio",
+      "name": "faq",
+      "required": false,
+      "pageUrl": "https://shorturl.net/"
+    },
+    {
+      "type": "radio",
+      "name": "faq",
+      "required": false,
+      "pageUrl": "https://shorturl.net/"
+    },
+    {
+      "type": "text",
+      "name": "name",
+      "id": "name",
+      "required": true,
+      "pageUrl": "https://shorturl.net/register/"
+    },
+    {
+      "type": "email",
+      "name": "email",
+      "id": "email",
+      "required": true,
+      "pageUrl": "https://shorturl.net/register/"
+    },
+    {
+      "type": "password",
+      "name": "password",
+      "id": "password",
+      "required": true,
+      "pageUrl": "https://shorturl.net/register/"
+    },
+    {
+      "type": "password",
+      "name": "password_confirmation",
+      "id": "password_confirmation",
+      "required": true,
+      "pageUrl": "https://shorturl.net/register/"
+    },
+    {
+      "type": "text",
+      "name": "captcha",
+      "id": "captcha",
+      "required": true,
+      "placeholder": "Enter the captcha",
+      "pageUrl": "https://shorturl.net/register/"
+    },
+    {
+      "type": "email",
+      "name": "email",
+      "id": "email",
+      "required": true,
+      "pageUrl": "https://shorturl.net/login/"
+    },
+    {
+      "type": "password",
+      "name": "password",
+      "id": "password",
+      "required": true,
+      "pageUrl": "https://shorturl.net/login/"
+    },
+    {
+      "type": "checkbox",
+      "name": "remember",
+      "id": "remember_me",
+      "required": false,
+      "pageUrl": "https://shorturl.net/login/"
+    },
+    {
+      "type": "hidden",
+      "name": "_token",
+      "required": false,
+      "pageUrl": "https://shorturl.net/track/"
+    },
+    {
+      "type": "text",
+      "name": "code",
+      "required": true,
+      "placeholder": "zffqxc or http://shorturl.net/zffqxc",
+      "pageUrl": "https://shorturl.net/track/"
+    },
+    {
+      "type": "email",
+      "name": "email",
+      "id": "email",
+      "required": true,
+      "pageUrl": "https://shorturl.net/login"
+    },
+    {
+      "type": "password",
+      "name": "password",
+      "id": "password",
+      "required": true,
+      "pageUrl": "https://shorturl.net/login"
+    },
+    {
+      "type": "checkbox",
+      "name": "remember",
+      "id": "remember_me",
+      "required": false,
+      "pageUrl": "https://shorturl.net/login"
+    },
+    {
+      "type": "email",
+      "name": "email",
+      "id": "email",
+      "required": true,
+      "pageUrl": "https://shorturl.net/forgot-password/"
+    }
+  ]
+}

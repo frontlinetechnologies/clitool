@@ -50,18 +50,25 @@ crawl https://example.com --verbose --rate-limit 2.5
 ### Generate Documentation
 
 ```bash
-# Generate documentation from crawl results (piped)
-crawl https://example.com | generate-docs
+# Using npm script (recommended for development)
+npm run crawl https://example.com | npm run generate-docs
+npm run crawl https://example.com | npm run generate-docs -- --output docs.md
 
-# Save documentation to file
+# Using node directly
+node dist/cli/crawl.js https://example.com | node dist/cli/generate-docs.js
+node dist/cli/crawl.js https://example.com | node dist/cli/generate-docs.js --output docs.md
+
+# After npm link (makes commands available globally)
+crawl https://example.com | generate-docs
 crawl https://example.com | generate-docs --output docs.md
 
 # Generate from existing crawl results file
-cat crawl-results.json | generate-docs
+cat crawl-results.json | npm run generate-docs
+cat crawl-results.json | node dist/cli/generate-docs.js
 
 # With AI descriptions (requires ANTHROPIC_API_KEY environment variable)
 export ANTHROPIC_API_KEY=your-api-key
-crawl https://example.com | generate-docs --output docs.md
+npm run crawl https://example.com | npm run generate-docs -- --output docs.md
 ```
 
 ### Generate Docs Options

@@ -14,7 +14,8 @@
     "test:coverage": "jest --coverage",
     "lint": "eslint src tests --ext .ts",
     "lint:fix": "eslint src tests --ext .ts --fix",
-    "crawl": "node dist/cli/crawl.js"
+    "crawl": "node dist/cli/crawl.js",
+    "generate-docs": "node dist/cli/generate-docs.js"
   },
   "keywords": [
     "web-crawler",
