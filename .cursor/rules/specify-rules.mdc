@@ -5,6 +5,7 @@ Auto-generated from all feature plans. Last updated: 2025-12-16
 ## Active Technologies
 
 - TypeScript 5.x with strict mode (Node.js LTS) + Playwright, cheerio (HTML parsing), commander (CLI), robots-parser (robots.txt parsing) (001-web-crawl)
+- TypeScript 5.x with strict mode (Node.js LTS) + @anthropic-ai/sdk (Anthropic API client), commander (CLI) (002-generate-docs)
 
 ## Project Structure
 
@@ -24,6 +25,7 @@ TypeScript 5.x with strict mode (Node.js LTS): Follow standard conventions
 ## Recent Changes
 
 - 001-web-crawl: Added TypeScript 5.x with strict mode (Node.js LTS) + Playwright, cheerio (HTML parsing), commander (CLI), robots-parser (robots.txt parsing)
+- 002-generate-docs: Added TypeScript 5.x with strict mode (Node.js LTS) + @anthropic-ai/sdk (Anthropic API client), commander (CLI)
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
