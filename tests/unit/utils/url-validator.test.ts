@@ -1,5 +1,4 @@
 import { validateURL } from '../../../src/utils/url-validator';
-import { CrawlError, ErrorType } from '../../../src/utils/errors';
 
 describe('URL Validator', () => {
   it('should accept valid HTTP URLs', () => {

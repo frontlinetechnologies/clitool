@@ -3,7 +3,6 @@ import {
   markPageProcessed,
   addLinksToPage,
   setPageError,
-  Page,
 } from '../../../src/models/page';
 
 describe('Page Model', () => {

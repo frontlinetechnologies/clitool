@@ -21,14 +21,17 @@ export function normalizeURL(urlString: string): string {
     // Normalize trailing slash
     const pathname = url.pathname;
     if (pathname && pathname !== '/') {
-      // Check if pathname looks like a file (has extension)
-      const hasExtension = /\.[a-zA-Z0-9]+$/.test(pathname.split('/').pop() || '');
-      if (!hasExtension && !pathname.endsWith('/')) {
-        // Directory-like path without trailing slash - add it
-        url.pathname = pathname + '/';
-      } else if (hasExtension && pathname.endsWith('/')) {
+      // Get the last non-empty segment to check for file extension
+      const segments = pathname.split('/').filter((s) => s.length > 0);
+      const lastSegment = segments.length > 0 ? segments[segments.length - 1] : '';
+      const hasExtension = /\.[a-zA-Z0-9]+$/.test(lastSegment);
+      
+      if (hasExtension && pathname.endsWith('/')) {
         // File with trailing slash - remove it
         url.pathname = pathname.slice(0, -1);
+      } else if (!hasExtension && !pathname.endsWith('/')) {
+        // Directory-like path without trailing slash - add it
+        url.pathname = pathname + '/';
       }
     } else if (pathname === '' && !urlString.endsWith('/')) {
       // Root path - ensure trailing slash

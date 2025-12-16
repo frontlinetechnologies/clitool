@@ -1,5 +1,4 @@
 import { PageProcessor } from '../../../src/crawler/page-processor';
-import { Page } from '../../../src/models/page';
 import { Browser, Page as PlaywrightPage } from 'playwright';
 
 // Mock Playwright

@@ -1,5 +1,4 @@
-import { Crawler } from '../../../src/crawler/crawler';
-import { createCrawlSummary } from '../../../src/models/crawl-summary';
+import { createCrawlSummary } from '../../src/models/crawl-summary';
 
 // Mock HTTP server would be ideal, but for now we'll use a simple test
 describe('Crawler Integration', () => {

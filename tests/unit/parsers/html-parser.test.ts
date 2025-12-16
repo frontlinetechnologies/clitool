@@ -88,7 +88,8 @@ describe('HTML Parser', () => {
     const result = parseHTML(html, baseURL);
 
     expect(result.forms).toHaveLength(1);
-    expect(result.forms[0].action).toBe(baseURL);
+    // URL normalization adds trailing slash to base URL
+    expect(result.forms[0].action).toBe('https://example.com/');
     expect(result.forms[0].method).toBe('GET');
   });
 });
