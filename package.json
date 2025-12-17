@@ -4,11 +4,11 @@
   "description": "AI-powered CLI tool for crawling web applications and generating E2E tests",
   "main": "dist/cli/index.js",
   "bin": {
-    "testarion": "./dist/cli/index.js"
+    "testarion": "dist/cli/index.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/frontlinetechnologies/clitool.git"
+    "url": "git+https://github.com/frontlinetechnologies/clitool.git"
   },
   "scripts": {
     "build": "tsc",
