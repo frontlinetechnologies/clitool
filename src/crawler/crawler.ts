@@ -81,7 +81,9 @@ export class Crawler {
     }
 
     // Use QueueItem to track depth
-    const queue: QueueItem[] = [{ url: normalizeURL(this.baseURL), depth: 0 }];
+    const startUrl = normalizeURL(this.baseURL);
+    const queue: QueueItem[] = [{ url: startUrl, depth: 0 }];
+    this.discoveredURLs.add(startUrl);
 
     // Set up interrupt handler
     const interruptHandler = (): void => {
@@ -112,20 +114,17 @@ export class Crawler {
         const item = queue.shift()!;
         const { url, depth } = item;
 
-        // Skip if already discovered
-        if (this.discoveredURLs.has(url)) {
-          continue;
-        }
-
         // Check URL filter
         if (!this.urlFilter.shouldCrawl(url)) {
-          incrementSkipped(summary);
+          const updatedSummary = incrementSkipped(summary);
+          Object.assign(summary, updatedSummary);
           continue;
         }
 
         // Check robots.txt
         if (this.robotsChecker && !this.robotsChecker.isAllowed(url)) {
-          incrementSkipped(summary);
+          const updatedSummary = incrementSkipped(summary);
+          Object.assign(summary, updatedSummary);
           continue;
         }
 
@@ -134,8 +133,6 @@ export class Crawler {
           summary.errors++;
           continue;
         }
-
-        this.discoveredURLs.add(url);
 
         // Apply rate limiting
         await this.rateLimiter.wait();
@@ -155,6 +152,7 @@ export class Crawler {
         if (canQueueLinks) {
           for (const link of result.links) {
             if (!this.discoveredURLs.has(link)) {
+              this.discoveredURLs.add(link);
               queue.push({ url: link, depth: nextDepth });
             }
           }
@@ -207,6 +205,24 @@ export class Crawler {
       // Track redirect chain
       if (result.page.status >= 300 && result.page.status < 400) {
         this.trackRedirect(url, result.page.url);
+      }
+
+      // Check if page redirected to an already-processed URL
+      const finalUrl = normalizeURL(result.page.url);
+      if (finalUrl !== url && this.discoveredURLs.has(finalUrl)) {
+        // Skip this page - we already have the redirect destination
+        const updatedSummary = incrementSkipped(summary);
+        Object.assign(summary, updatedSummary);
+        return {
+          page: result.page,
+          links: [],
+          elements: { forms: [], buttons: [], inputFields: [] },
+        };
+      }
+
+      // Mark redirect destination as discovered to prevent future duplicates
+      if (finalUrl !== url) {
+        this.discoveredURLs.add(finalUrl);
       }
 
       // Update summary
