@@ -154,7 +154,7 @@ async function resetSinglePrompt(
     }
 
     console.error('');
-    console.error("Run 'reset-prompts --list' to see all available prompts.");
+    console.error("Run 'testarion reset-prompts --list' to see all available prompts.");
     process.exit(1);
   }
 
@@ -300,4 +300,9 @@ program
     }
   });
 
-program.parse();
+// Parse command line arguments
+if (require.main === module) {
+  program.parse();
+}
+
+export { program };

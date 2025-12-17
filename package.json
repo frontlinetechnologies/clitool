@@ -1,13 +1,14 @@
 {
-  "name": "@testarion/clitool",
+  "name": "@testarion/cli",
   "version": "0.1.0",
-  "description": "CLI tool for crawling web applications to discover pages, forms, buttons, and input fields",
-  "main": "dist/cli/crawl.js",
+  "description": "AI-powered CLI tool for crawling web applications and generating E2E tests",
+  "main": "dist/cli/index.js",
   "bin": {
-    "crawl": "./dist/cli/crawl.js",
-    "generate-docs": "./dist/cli/generate-docs.js",
-    "generate-tests": "./dist/cli/generate-tests.js",
-    "reset-prompts": "./dist/cli/reset-prompts.js"
+    "testarion": "./dist/cli/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/frontlinetechnologies/clitool.git"
   },
   "scripts": {
     "build": "tsc",

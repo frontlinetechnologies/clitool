@@ -39,10 +39,10 @@ program
   .option('--verbose', 'Show detailed information including API key configuration guidance')
   .addHelpText('after', `
 Examples:
-  $ crawl https://example.com | generate-tests
-  $ crawl https://example.com | generate-tests --output-dir ./e2e-tests
-  $ crawl https://example.com | generate-tests --anthropic-api-key your-api-key
-  $ cat crawl-results.json | generate-tests
+  $ testarion crawl https://example.com | testarion generate-tests
+  $ testarion crawl https://example.com | testarion generate-tests --output-dir ./e2e-tests
+  $ testarion crawl https://example.com | testarion generate-tests --anthropic-api-key your-api-key
+  $ cat crawl-results.json | testarion generate-tests
 
 The test generator will:
   - Read crawl results JSON from stdin

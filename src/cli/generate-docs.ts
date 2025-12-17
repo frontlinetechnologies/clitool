@@ -40,10 +40,10 @@ program
   .option('--verbose', 'Show detailed information including API key configuration guidance')
   .addHelpText('after', `
 Examples:
-  $ crawl https://example.com | generate-docs
-  $ crawl https://example.com | generate-docs --output docs.md
-  $ crawl https://example.com | generate-docs --anthropic-api-key your-api-key --output docs.md
-  $ cat crawl-results.json | generate-docs
+  $ testarion crawl https://example.com | testarion generate-docs
+  $ testarion crawl https://example.com | testarion generate-docs --output docs.md
+  $ testarion crawl https://example.com | testarion generate-docs --anthropic-api-key your-api-key --output docs.md
+  $ cat crawl-results.json | testarion generate-docs
 
 The documentation generator will:
   - Read crawl results JSON from stdin

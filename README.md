@@ -1,8 +1,8 @@
-# @testarion/clitool
+# @testarion/cli
 
-[![npm version](https://img.shields.io/npm/v/@testarion/clitool.svg)](https://www.npmjs.com/package/@testarion/clitool)
+[![npm version](https://img.shields.io/npm/v/@testarion/cli.svg)](https://www.npmjs.com/package/@testarion/cli)
 [![License: O'Saasy](https://img.shields.io/badge/License-O'Saasy-blue.svg)](LICENSE)
-[![Node.js Version](https://img.shields.io/node/v/@testarion/clitool.svg)](package.json)
+[![Node.js Version](https://img.shields.io/node/v/@testarion/cli.svg)](package.json)
 
 AI-powered CLI tool for crawling web applications and generating E2E tests. Built for indie SaaS founders who need reliable testing without enterprise budgets.
 
@@ -29,13 +29,13 @@ AI-powered CLI tool for crawling web applications and generating E2E tests. Buil
 
 ```bash
 # No installation required
-npx @testarion/clitool crawl https://example.com
+npx @testarion/cli crawl https://example.com
 ```
 
 ## Installation
 
 ```bash
-npm install -g @testarion/clitool
+npm install -g @testarion/cli
 ```
 
 Or install locally:
@@ -50,7 +50,7 @@ npm run build
 ### Crawl
 
 ```bash
-crawl https://example.com
+testarion crawl https://example.com
 ```
 
 **Options:**
@@ -65,43 +65,34 @@ crawl https://example.com
 
 ```bash
 # Basic crawl with JSON output
-crawl https://example.com
+testarion crawl https://example.com
 
 # Quiet mode with file output
-crawl https://example.com --quiet --output results.json
+testarion crawl https://example.com --quiet --output results.json
 
 # Human-readable text output
-crawl https://example.com --format text
+testarion crawl https://example.com --format text
 
 # Verbose mode with custom rate limit
-crawl https://example.com --verbose --rate-limit 2.5
+testarion crawl https://example.com --verbose --rate-limit 2.5
 ```
 
 ### Generate Documentation
 
 ```bash
-# Using npm script (recommended for development)
-npm run crawl https://example.com | npm run generate-docs
-npm run crawl https://example.com | npm run generate-docs -- --output docs.md
-
-# Using node directly
-node dist/cli/crawl.js https://example.com | node dist/cli/generate-docs.js
-node dist/cli/crawl.js https://example.com | node dist/cli/generate-docs.js --output docs.md
-
-# After npm link (makes commands available globally)
-crawl https://example.com | generate-docs
-crawl https://example.com | generate-docs --output docs.md
+# Basic usage
+testarion crawl https://example.com | testarion generate-docs
+testarion crawl https://example.com | testarion generate-docs --output docs.md
 
 # Generate from existing crawl results file
-cat crawl-results.json | npm run generate-docs
-cat crawl-results.json | node dist/cli/generate-docs.js
+cat crawl-results.json | testarion generate-docs
 
 # With AI descriptions (using environment variable)
 export ANTHROPIC_API_KEY=your-api-key
-npm run crawl https://example.com | npm run generate-docs -- --output docs.md
+testarion crawl https://example.com | testarion generate-docs --output docs.md
 
 # With AI descriptions (using command-line parameter)
-npm run crawl https://example.com | npm run generate-docs -- --anthropic-api-key your-api-key --output docs.md
+testarion crawl https://example.com | testarion generate-docs --anthropic-api-key your-api-key --output docs.md
 ```
 
 **Options:**
@@ -119,28 +110,19 @@ The `generate-docs` command reads crawl results JSON from stdin and generates co
 ### Generate Tests
 
 ```bash
-# Using npm script (recommended for development)
-npm run crawl https://example.com | npm run generate-tests
-npm run crawl https://example.com | npm run generate-tests -- --output-dir ./e2e-tests
-
-# Using node directly
-node dist/cli/crawl.js https://example.com | node dist/cli/generate-tests.js
-node dist/cli/crawl.js https://example.com | node dist/cli/generate-tests.js --output-dir ./e2e-tests
-
-# After npm link (makes commands available globally)
-crawl https://example.com | generate-tests
-crawl https://example.com | generate-tests --output-dir ./e2e-tests
+# Basic usage
+testarion crawl https://example.com | testarion generate-tests
+testarion crawl https://example.com | testarion generate-tests --output-dir ./e2e-tests
 
 # Generate from existing crawl results file
-cat crawl-results.json | npm run generate-tests
-cat crawl-results.json | node dist/cli/generate-tests.js
+cat crawl-results.json | testarion generate-tests
 
 # With AI enhancement (using environment variable)
 export ANTHROPIC_API_KEY=your-api-key
-npm run crawl https://example.com | npm run generate-tests
+testarion crawl https://example.com | testarion generate-tests
 
 # With AI enhancement (using command-line parameter)
-npm run crawl https://example.com | npm run generate-tests -- --anthropic-api-key your-api-key
+testarion crawl https://example.com | testarion generate-tests --anthropic-api-key your-api-key
 ```
 
 **Options:**
@@ -199,14 +181,14 @@ The AI-enhanced features require an Anthropic API key. The tool supports three m
 ### Method 1: Command-Line Parameter (Highest Priority)
 
 ```bash
-generate-tests --anthropic-api-key sk-ant-api03-... < input.json
+testarion generate-tests --anthropic-api-key sk-ant-api03-... < input.json
 ```
 
 ### Method 2: Environment Variable
 
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-api03-...
-generate-tests < input.json
+testarion generate-tests < input.json
 ```
 
 ### Method 3: Configuration File (Persistent)
@@ -230,7 +212,7 @@ chmod 600 ~/.testarion/config.json
 Once configured, the tool automatically uses your key:
 
 ```bash
-generate-tests < input.json  # Key automatically loaded from config file
+testarion generate-tests < input.json  # Key automatically loaded from config file
 ```
 
 ### Auto-Save Prompt
@@ -287,7 +269,7 @@ Ensure your API key:
 If crawling fails due to rate limits, increase the delay:
 
 ```bash
-crawl https://example.com --rate-limit 3.0
+testarion crawl https://example.com --rate-limit 3.0
 ```
 
 ### Empty crawl results

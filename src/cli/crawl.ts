@@ -43,13 +43,13 @@ program
   .option('--exclude <pattern...>', 'Skip URLs matching these patterns (glob or /regex/)')
   .addHelpText('after', `
 Examples:
-  $ crawl https://example.com
-  $ crawl https://example.com --format text
-  $ crawl https://example.com --quiet --output results.json
-  $ crawl https://example.com --verbose --rate-limit 2.0
-  $ crawl https://example.com --max-pages 50 --max-depth 3
-  $ crawl https://example.com --include "**/products/**" --exclude "**/admin/**"
-  $ crawl https://example.com --include "/\\/api\\//" --max-pages 100
+  $ testarion crawl https://example.com
+  $ testarion crawl https://example.com --format text
+  $ testarion crawl https://example.com --quiet --output results.json
+  $ testarion crawl https://example.com --verbose --rate-limit 2.0
+  $ testarion crawl https://example.com --max-pages 50 --max-depth 3
+  $ testarion crawl https://example.com --include "**/products/**" --exclude "**/admin/**"
+  $ testarion crawl https://example.com --include "/\\/api\\//" --max-pages 100
 
 The crawler will:
   - Discover all accessible pages starting from the provided URL
