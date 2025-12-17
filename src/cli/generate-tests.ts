@@ -9,6 +9,7 @@ import { Command } from 'commander';
 import { parseCrawlResults } from '../test-generation/crawl-results-parser';
 import { generateTestSuite } from '../test-generation/test-generator';
 import { createTestGenerationError, TestGenerationErrorType } from '../test-generation/errors';
+import { isAIError } from '../ai/errors';
 import {
   resolveApiKey,
   shouldPromptToSave,
@@ -147,6 +148,10 @@ Input Format:
 
       process.exit(0);
     } catch (error) {
+      if (isAIError(error)) {
+        console.error('Error:', error.toUserMessage());
+        process.exit(1);
+      }
       if (error instanceof Error && error.name === 'TestGenerationError') {
         const testError = error as ReturnType<typeof createTestGenerationError>;
         console.error('Error:', testError.toUserMessage());

@@ -26,43 +26,59 @@ describe('Anthropic Client', () => {
   });
 
   it('should initialize client when API key is set', async () => {
-    process.env.ANTHROPIC_API_KEY = 'test-key';
+    process.env.ANTHROPIC_API_KEY = 'sk-ant-test-key';
     const mockClient = {
       messages: {
         create: jest.fn(),
       },
     };
-    
+
     // Set up mock implementation
     mockAnthropic.mockImplementation(() => mockClient as any);
-    
+
     const { initializeClient, resetClient } = await import('../../../src/ai/anthropic-client');
     resetClient();
 
     const client = initializeClient();
     expect(client).toBeDefined();
     expect(client).toBe(mockClient);
-    expect(mockAnthropic).toHaveBeenCalledWith({ apiKey: 'test-key' });
+    expect(mockAnthropic).toHaveBeenCalledWith({ apiKey: 'sk-ant-test-key' });
   });
 
-  it('should return null on initialization error', async () => {
-    process.env.ANTHROPIC_API_KEY = 'test-key';
-    
+  it('should throw AIError on invalid API key format', async () => {
+    process.env.ANTHROPIC_API_KEY = 'invalid-key';
+
+    const { initializeClient, resetClient } = await import('../../../src/ai/anthropic-client');
+    const { AIError, AIErrorType } = await import('../../../src/ai/errors');
+    resetClient();
+
+    expect(() => initializeClient()).toThrow(AIError);
+    try {
+      initializeClient();
+    } catch (error) {
+      expect(error).toBeInstanceOf(AIError);
+      expect((error as any).type).toBe(AIErrorType.INVALID_KEY_FORMAT);
+    }
+  });
+
+  it('should throw AIError on initialization error', async () => {
+    process.env.ANTHROPIC_API_KEY = 'sk-ant-test-key';
+
     // Set up mock to throw error
     mockAnthropic.mockImplementation(() => {
       throw new Error('Initialization failed');
     });
-    
+
     const { initializeClient, resetClient } = await import('../../../src/ai/anthropic-client');
+    const { AIError } = await import('../../../src/ai/errors');
     resetClient();
 
-    const client = initializeClient();
-    expect(client).toBeNull();
-    expect(mockAnthropic).toHaveBeenCalledWith({ apiKey: 'test-key' });
+    expect(() => initializeClient()).toThrow(AIError);
+    expect(mockAnthropic).toHaveBeenCalledWith({ apiKey: 'sk-ant-test-key' });
   });
 
   it('should analyze page and return description', async () => {
-    process.env.ANTHROPIC_API_KEY = 'test-key';
+    process.env.ANTHROPIC_API_KEY = 'sk-ant-test-key';
     const mockResponse = {
       content: [
         {
@@ -101,23 +117,22 @@ describe('Anthropic Client', () => {
     );
   });
 
-  it('should return null when API call fails', async () => {
-    process.env.ANTHROPIC_API_KEY = 'test-key';
+  it('should throw AIError when API call fails', async () => {
+    process.env.ANTHROPIC_API_KEY = 'sk-ant-test-key';
     const mockClient = {
       messages: {
         create: jest.fn().mockRejectedValue(new Error('API error')),
       },
     };
-    
+
     // Set up mock implementation
     mockAnthropic.mockImplementation(() => mockClient as any);
-    
+
     const { analyzePage, resetClient } = await import('../../../src/ai/anthropic-client');
+    const { AIError } = await import('../../../src/ai/errors');
     resetClient();
 
-    const description = await analyzePage('https://example.com');
-
-    expect(description).toBeNull();
+    await expect(analyzePage('https://example.com')).rejects.toThrow(AIError);
     expect(mockClient.messages.create).toHaveBeenCalled();
   });
 
@@ -131,7 +146,7 @@ describe('Anthropic Client', () => {
   });
 
   it('should handle non-text response content', async () => {
-    process.env.ANTHROPIC_API_KEY = 'test-key';
+    process.env.ANTHROPIC_API_KEY = 'sk-ant-test-key';
     const mockResponse = {
       content: [
         {
@@ -146,10 +161,10 @@ describe('Anthropic Client', () => {
         create: jest.fn().mockResolvedValue(mockResponse),
       },
     };
-    
+
     // Set up mock implementation
     mockAnthropic.mockImplementation(() => mockClient as any);
-    
+
     const { analyzePage, resetClient } = await import('../../../src/ai/anthropic-client');
     resetClient();
 

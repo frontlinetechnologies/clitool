@@ -20,6 +20,10 @@ interface CrawlOptions {
   verbose: boolean;
   rateLimit: string;
   output?: string;
+  maxPages?: string;
+  maxDepth?: string;
+  include?: string[];
+  exclude?: string[];
 }
 
 const program = new Command();
@@ -33,12 +37,19 @@ program
   .option('--verbose', 'Include detailed information about each page and element', false)
   .option('--rate-limit <seconds>', 'Delay between requests in seconds (default: 1.5)', '1.5')
   .option('--output <file>', 'Save results to file instead of stdout')
+  .option('--max-pages <n>', 'Maximum number of pages to crawl')
+  .option('--max-depth <n>', 'Maximum link depth from start URL (0 = start page only)')
+  .option('--include <pattern...>', 'Only crawl URLs matching these patterns (glob or /regex/)')
+  .option('--exclude <pattern...>', 'Skip URLs matching these patterns (glob or /regex/)')
   .addHelpText('after', `
 Examples:
   $ crawl https://example.com
   $ crawl https://example.com --format text
   $ crawl https://example.com --quiet --output results.json
   $ crawl https://example.com --verbose --rate-limit 2.0
+  $ crawl https://example.com --max-pages 50 --max-depth 3
+  $ crawl https://example.com --include "**/products/**" --exclude "**/admin/**"
+  $ crawl https://example.com --include "/\\/api\\//" --max-pages 100
 
 The crawler will:
   - Discover all accessible pages starting from the provided URL
@@ -46,6 +57,8 @@ The crawler will:
   - Respect robots.txt rules
   - Implement rate limiting to avoid overwhelming servers
   - Output results in JSON or human-readable text format
+  - Stop when limits are reached (--max-pages, --max-depth)
+  - Filter URLs using include/exclude patterns (glob or /regex/)
 
 Press Ctrl+C to interrupt the crawl gracefully. Partial results will be saved.
   `)
@@ -64,8 +77,33 @@ Press Ctrl+C to interrupt the crawl gracefully. Partial results will be saved.
         process.exit(1);
       }
 
-      // Create crawler with rate limiting
-      const crawler = new Crawler(url, options.quiet, rateLimit);
+      // Parse maxPages
+      let maxPages: number | undefined;
+      if (options.maxPages) {
+        maxPages = parseInt(options.maxPages, 10);
+        if (isNaN(maxPages) || maxPages < 1) {
+          console.error('Error: --max-pages must be a positive integer');
+          process.exit(1);
+        }
+      }
+
+      // Parse maxDepth
+      let maxDepth: number | undefined;
+      if (options.maxDepth) {
+        maxDepth = parseInt(options.maxDepth, 10);
+        if (isNaN(maxDepth) || maxDepth < 0) {
+          console.error('Error: --max-depth must be a non-negative integer');
+          process.exit(1);
+        }
+      }
+
+      // Create crawler with rate limiting and config
+      const crawler = new Crawler(url, options.quiet, rateLimit, {
+        maxPages,
+        maxDepth,
+        includePatterns: options.include,
+        excludePatterns: options.exclude,
+      });
 
       // Perform crawl
       const results = await crawler.crawl();

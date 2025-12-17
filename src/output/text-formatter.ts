@@ -4,6 +4,25 @@
  */
 
 import { CrawlResults } from './json-formatter';
+import { StopReason } from '../models/crawl-summary';
+
+/**
+ * Formats stop reason as human-readable text.
+ */
+function formatStopReason(reason: StopReason | undefined): string {
+  switch (reason) {
+    case 'completed':
+      return 'Crawl completed normally';
+    case 'max_pages_reached':
+      return 'Stopped: Maximum page limit reached';
+    case 'interrupted':
+      return 'Stopped: User interrupted (Ctrl+C)';
+    case 'error':
+      return 'Stopped: Fatal error occurred';
+    default:
+      return '';
+  }
+}
 
 /**
  * Formats crawl results as human-readable text.
@@ -20,13 +39,34 @@ export function formatAsText(results: CrawlResults): string {
   output += `Errors: ${summary.errors}\n`;
   output += `Skipped: ${summary.skipped}\n`;
 
+  // Show limits if set
+  if (summary.maxPagesLimit !== undefined) {
+    output += `Max Pages Limit: ${summary.maxPagesLimit}\n`;
+  }
+  if (summary.maxDepthLimit !== undefined) {
+    output += `Max Depth Limit: ${summary.maxDepthLimit}\n`;
+  }
+
   if (summary.duration !== undefined) {
     const minutes = Math.floor(summary.duration / 60);
     const seconds = summary.duration % 60;
     output += `Duration: ${minutes}m ${seconds}s\n`;
   }
 
-  if (summary.interrupted) {
+  // Show stop reason
+  if (summary.stopReason) {
+    const stopReasonText = formatStopReason(summary.stopReason);
+    if (stopReasonText) {
+      if (summary.stopReason === 'interrupted') {
+        output += `\n⚠️  ${stopReasonText}\n`;
+      } else if (summary.stopReason === 'max_pages_reached') {
+        output += `\nℹ️  ${stopReasonText}\n`;
+      } else if (summary.stopReason === 'error') {
+        output += `\n❌  ${stopReasonText}\n`;
+      }
+    }
+  } else if (summary.interrupted) {
+    // Legacy support for interrupted flag without stopReason
     output += '\n⚠️  Crawl was interrupted\n';
   }
 

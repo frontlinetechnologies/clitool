@@ -47,7 +47,8 @@ export class PageProcessor {
     try {
       const playwrightPage = await this.browser!.newPage();
       
-      // Retry logic for 429 responses with exponential backoff
+      // Retry logic for 429 and 5xx responses with exponential backoff
+      const retryableStatusCodes = [429, 500, 502, 503, 504];
       let response = null;
       let attempt = 0;
       const maxRetries = 3;
@@ -61,8 +62,8 @@ export class PageProcessor {
 
           const status = response?.status() || 200;
 
-          // If 429, wait and retry
-          if (status === 429 && attempt < maxRetries) {
+          // If retryable status code, wait and retry
+          if (retryableStatusCodes.includes(status) && attempt < maxRetries) {
             const backoffDelay = exponentialBackoff(attempt, 1000);
             await new Promise((resolve) => setTimeout(resolve, backoffDelay));
             attempt++;
@@ -72,12 +73,23 @@ export class PageProcessor {
           // Success or non-retryable error
           break;
         } catch (error) {
-          // Check if it's a 429 error
-          if (attempt < maxRetries && error instanceof Error && error.message.includes('429')) {
-            const backoffDelay = exponentialBackoff(attempt, 1000);
-            await new Promise((resolve) => setTimeout(resolve, backoffDelay));
-            attempt++;
-            continue;
+          // Check if it's a retryable error (429, 5xx, or timeout)
+          if (attempt < maxRetries && error instanceof Error) {
+            const errorMessage = error.message.toLowerCase();
+            const isRetryable =
+              errorMessage.includes('429') ||
+              errorMessage.includes('500') ||
+              errorMessage.includes('502') ||
+              errorMessage.includes('503') ||
+              errorMessage.includes('504') ||
+              errorMessage.includes('timeout');
+
+            if (isRetryable) {
+              const backoffDelay = exponentialBackoff(attempt, 1000);
+              await new Promise((resolve) => setTimeout(resolve, backoffDelay));
+              attempt++;
+              continue;
+            }
           }
           throw error;
         }

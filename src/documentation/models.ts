@@ -3,12 +3,6 @@
  * These models define the data structures used throughout the documentation generation process.
  */
 
-import { Page } from '../models/page';
-import { Form } from '../models/form';
-import { Button } from '../models/button';
-import { InputField } from '../models/input-field';
-import { CrawlSummary } from '../models/crawl-summary';
-
 /**
  * Summary statistics for the generated documentation.
  */
@@ -138,13 +132,7 @@ export interface Documentation {
 }
 
 /**
- * Input structure for crawl results parser.
+ * Re-export CrawlResultsInput from shared module for backwards compatibility.
  */
-export interface CrawlResultsInput {
-  summary: CrawlSummary;
-  pages: Page[];
-  forms?: Form[];
-  buttons?: Button[];
-  inputFields?: InputField[];
-}
+export { CrawlResultsInput } from '../shared/models';
 

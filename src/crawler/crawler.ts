@@ -13,6 +13,8 @@ import {
   incrementErrors,
   incrementSkipped,
   markInterrupted,
+  markMaxPagesReached,
+  markCompleted,
   finalizeCrawlSummary,
 } from '../models/crawl-summary';
 import { createProgressReporter, ProgressReporter } from '../utils/progress';
@@ -22,6 +24,8 @@ import { Button } from '../models/button';
 import { InputField } from '../models/input-field';
 import { RobotsChecker, createRobotsChecker } from '../parsers/robots-parser';
 import { RateLimiter, createRateLimiter } from '../utils/rate-limiter';
+import { CrawlConfig, QueueItem, mergeCrawlConfig } from './crawl-config';
+import { URLFilter, createURLFilter, createPermissiveFilter } from '../utils/url-filter';
 
 export interface CrawlResults {
   summary: CrawlSummary;
@@ -36,6 +40,7 @@ export class Crawler {
   private progressReporter: ProgressReporter;
   private robotsChecker: RobotsChecker | null = null;
   private rateLimiter: RateLimiter;
+  private urlFilter: URLFilter;
   private discoveredURLs: Set<string> = new Set();
   private pages: Page[] = [];
   private forms: Form[] = [];
@@ -43,24 +48,40 @@ export class Crawler {
   private inputFields: InputField[] = [];
   private redirectChains: Map<string, string[]> = new Map();
   private baseURL: string;
+  private config: CrawlConfig;
 
   constructor(
     baseURL: string,
     private readonly quiet: boolean = false,
     rateLimitSeconds: number = 1.5,
+    config?: Partial<CrawlConfig>,
   ) {
     this.baseURL = baseURL;
+    this.config = mergeCrawlConfig(config);
     this.processor = new PageProcessor(baseURL);
-    this.progressReporter = createProgressReporter(quiet);
+    this.progressReporter = createProgressReporter(quiet, this.config.maxPages);
     this.rateLimiter = createRateLimiter(rateLimitSeconds);
+    this.urlFilter = this.config.includePatterns || this.config.excludePatterns
+      ? createURLFilter(this.config.includePatterns, this.config.excludePatterns)
+      : createPermissiveFilter();
   }
 
   /**
    * Performs the crawl starting from the base URL.
    */
   async crawl(): Promise<CrawlResults> {
-    const summary = createCrawlSummary();
-    const queue: string[] = [normalizeURL(this.baseURL)];
+    let summary = createCrawlSummary();
+
+    // Store limits in summary for display
+    if (this.config.maxPages !== undefined) {
+      summary.maxPagesLimit = this.config.maxPages;
+    }
+    if (this.config.maxDepth !== undefined) {
+      summary.maxDepthLimit = this.config.maxDepth;
+    }
+
+    // Use QueueItem to track depth
+    const queue: QueueItem[] = [{ url: normalizeURL(this.baseURL), depth: 0 }];
 
     // Set up interrupt handler
     const interruptHandler = (): void => {
@@ -82,10 +103,23 @@ export class Crawler {
       }
 
       while (queue.length > 0 && !isInterruptedSignal()) {
-        const url = queue.shift()!;
+        // Check maxPages limit
+        if (this.config.maxPages !== undefined && this.pages.length >= this.config.maxPages) {
+          summary = markMaxPagesReached(summary);
+          break;
+        }
+
+        const item = queue.shift()!;
+        const { url, depth } = item;
 
         // Skip if already discovered
         if (this.discoveredURLs.has(url)) {
+          continue;
+        }
+
+        // Check URL filter
+        if (!this.urlFilter.shouldCrawl(url)) {
+          incrementSkipped(summary);
           continue;
         }
 
@@ -114,17 +148,22 @@ export class Crawler {
         this.buttons.push(...result.elements.buttons);
         this.inputFields.push(...result.elements.inputFields);
 
-        // Add discovered links to queue
-        for (const link of result.links) {
-          if (!this.discoveredURLs.has(link)) {
-            queue.push(link);
+        // Add discovered links to queue (with depth tracking)
+        const nextDepth = depth + 1;
+        const canQueueLinks = this.config.maxDepth === undefined || nextDepth <= this.config.maxDepth;
+
+        if (canQueueLinks) {
+          for (const link of result.links) {
+            if (!this.discoveredURLs.has(link)) {
+              queue.push({ url: link, depth: nextDepth });
+            }
           }
         }
 
         // Update progress
         this.progressReporter.update(
-          this.discoveredURLs.size,
-          this.discoveredURLs.size + queue.length,
+          this.pages.length,
+          this.pages.length + queue.length,
           url,
         );
       }
@@ -133,7 +172,12 @@ export class Crawler {
       if (isInterruptedSignal()) {
         const interruptedSummary = markInterrupted(summary);
         removeInterruptHandler(interruptHandler);
-        return this.buildResults(interruptedSummary);
+        return this.buildResults(finalizeCrawlSummary(interruptedSummary));
+      }
+
+      // Mark as completed if not stopped by maxPages
+      if (summary.stopReason !== 'max_pages_reached') {
+        summary = markCompleted(summary);
       }
 
       // Finalize summary

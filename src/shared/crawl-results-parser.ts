@@ -5,7 +5,7 @@
  */
 
 import * as readline from 'readline';
-import { CrawlResultsInput } from '../documentation/models';
+import { CrawlResultsInput } from './models';
 import { Page } from '../models/page';
 import { Form } from '../models/form';
 import { Button } from '../models/button';

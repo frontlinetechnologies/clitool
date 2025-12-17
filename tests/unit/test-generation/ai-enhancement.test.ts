@@ -23,8 +23,14 @@ describe('AI Enhancement for Test Generation', () => {
     });
 
     it('should return true when API key is set', () => {
-      process.env.ANTHROPIC_API_KEY = 'test-api-key';
+      process.env.ANTHROPIC_API_KEY = 'sk-ant-test-api-key';
       expect(isAIAvailable()).toBe(true);
+    });
+
+    it('should throw AIError on invalid API key format', () => {
+      process.env.ANTHROPIC_API_KEY = 'invalid-key';
+      const { AIError } = require('../../../src/ai/errors');
+      expect(() => isAIAvailable()).toThrow(AIError);
     });
   });
 

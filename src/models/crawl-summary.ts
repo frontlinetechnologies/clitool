@@ -2,6 +2,15 @@
  * CrawlSummary model representing aggregated results of a crawl session.
  */
 
+/**
+ * Reasons why a crawl stopped.
+ */
+export type StopReason =
+  | 'completed'           // All URLs processed
+  | 'max_pages_reached'   // Hit maxPages limit
+  | 'interrupted'         // User interrupted (Ctrl+C)
+  | 'error';              // Fatal error occurred
+
 export interface CrawlSummary {
   totalPages: number;
   totalForms: number;
@@ -13,6 +22,9 @@ export interface CrawlSummary {
   startTime: string; // ISO 8601 timestamp
   endTime?: string; // ISO 8601 timestamp (null if interrupted)
   duration?: number; // Duration in seconds (null if interrupted)
+  stopReason?: StopReason; // Why the crawl stopped
+  maxPagesLimit?: number; // The maxPages limit if set
+  maxDepthLimit?: number; // The maxDepth limit if set
 }
 
 /**
@@ -68,6 +80,27 @@ export function markInterrupted(summary: CrawlSummary): CrawlSummary {
   return {
     ...summary,
     interrupted: true,
+    stopReason: 'interrupted',
+  };
+}
+
+/**
+ * Marks the crawl as stopped due to maxPages limit.
+ */
+export function markMaxPagesReached(summary: CrawlSummary): CrawlSummary {
+  return {
+    ...summary,
+    stopReason: 'max_pages_reached',
+  };
+}
+
+/**
+ * Marks the crawl as completed normally.
+ */
+export function markCompleted(summary: CrawlSummary): CrawlSummary {
+  return {
+    ...summary,
+    stopReason: 'completed',
   };
 }
 

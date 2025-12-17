@@ -5,10 +5,20 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import {
+  AuthenticationError,
+  RateLimitError,
+  APIConnectionError,
+} from '@anthropic-ai/sdk';
+import {
   initializePromptLoader,
   loadAndRenderPrompt,
   isPromptError,
 } from '../prompts';
+import {
+  AIError,
+  AIErrorType,
+  createAIError,
+} from './errors';
 
 const DEFAULT_MODEL = 'claude-sonnet-4-5-20250929';
 
@@ -22,10 +32,59 @@ export function resetClient(): void {
 }
 
 /**
+ * Validates API key format.
+ * Anthropic API keys should start with 'sk-ant-'.
+ */
+function validateApiKeyFormat(key: string): void {
+  if (!key.startsWith('sk-ant-')) {
+    throw new AIError(AIErrorType.INVALID_KEY_FORMAT);
+  }
+}
+
+/**
+ * Converts SDK errors to AIError.
+ */
+function handleAPIError(error: unknown): AIError {
+  // Handle SDK error classes - check by name first to be resilient to mocking
+  if (error instanceof Error) {
+    const errorName = error.constructor.name;
+
+    // Check by class name (works even when SDK is mocked)
+    if (errorName === 'AuthenticationError') {
+      return new AIError(AIErrorType.AUTHENTICATION_ERROR, error);
+    }
+    if (errorName === 'RateLimitError') {
+      return new AIError(AIErrorType.RATE_LIMIT_ERROR, error);
+    }
+    if (errorName === 'APIConnectionError') {
+      return new AIError(AIErrorType.CONNECTION_ERROR, error);
+    }
+
+    // Fallback to instanceof checks (for real SDK errors)
+    try {
+      if (AuthenticationError && error instanceof AuthenticationError) {
+        return new AIError(AIErrorType.AUTHENTICATION_ERROR, error);
+      }
+      if (RateLimitError && error instanceof RateLimitError) {
+        return new AIError(AIErrorType.RATE_LIMIT_ERROR, error);
+      }
+      if (APIConnectionError && error instanceof APIConnectionError) {
+        return new AIError(AIErrorType.CONNECTION_ERROR, error);
+      }
+    } catch {
+      // Ignore instanceof errors in test environments
+    }
+  }
+  return createAIError(error);
+}
+
+/**
  * Initializes the Anthropic API client with API key from parameter or environment variable.
- * Returns null if API key is not available or initialization fails.
- * 
+ * Returns null if API key is not available.
+ * Throws AIError if API key format is invalid.
+ *
  * @param apiKey - Optional API key. If provided, takes precedence over environment variable.
+ * @throws {AIError} If API key format is invalid
  */
 export function initializeClient(apiKey?: string): Anthropic | null {
   if (client !== null && !apiKey) {
@@ -37,6 +96,9 @@ export function initializeClient(apiKey?: string): Anthropic | null {
     return null;
   }
 
+  // Validate API key format
+  validateApiKeyFormat(keyToUse);
+
   try {
     // If apiKey parameter is provided, create a new client instance
     // Otherwise, reuse cached client if available
@@ -45,7 +107,7 @@ export function initializeClient(apiKey?: string): Anthropic | null {
         apiKey: keyToUse,
       });
     }
-    
+
     if (client === null) {
       client = new Anthropic({
         apiKey: keyToUse,
@@ -53,8 +115,7 @@ export function initializeClient(apiKey?: string): Anthropic | null {
     }
     return client;
   } catch (error) {
-    // Gracefully handle initialization errors
-    return null;
+    throw handleAPIError(error);
   }
 }
 
@@ -126,9 +187,10 @@ export async function analyzePage(
           console.error(`Suggestions: ${error.suggestions.join(', ')}`);
         }
       }
+      return null;
     }
-    // Gracefully handle API errors - return null to trigger fallback
-    return null;
+    // Re-throw AIError for proper handling upstream
+    throw handleAPIError(error);
   }
 }
 
@@ -235,9 +297,10 @@ export async function analyzeFlowForTests(
           console.error(`Suggestions: ${error.suggestions.join(', ')}`);
         }
       }
+      return null;
     }
-    // Gracefully handle API errors - return null to trigger fallback
-    return null;
+    // Re-throw AIError for proper handling upstream
+    throw handleAPIError(error);
   }
 }
 
@@ -418,8 +481,10 @@ export async function generateEnhancedTestData(
           console.error(`Suggestions: ${error.suggestions.join(', ')}`);
         }
       }
+      return null;
     }
-    return null;
+    // Re-throw AIError for proper handling upstream
+    throw handleAPIError(error);
   }
 }
 

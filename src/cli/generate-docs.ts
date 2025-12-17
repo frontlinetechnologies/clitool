@@ -10,6 +10,7 @@ import { parseCrawlResults } from '../documentation/crawl-results-parser';
 import { generateDocumentation } from '../documentation/doc-generator';
 import { formatAsMarkdown } from '../documentation/markdown-formatter';
 import { createDocumentationError, DocumentationErrorType } from '../documentation/errors';
+import { isAIError } from '../ai/errors';
 import {
   resolveApiKey,
   shouldPromptToSave,
@@ -135,6 +136,10 @@ Input Format:
 
       process.exit(0);
     } catch (error) {
+      if (isAIError(error)) {
+        console.error('Error:', error.toUserMessage());
+        process.exit(1);
+      }
       if (error instanceof Error && error.name === 'DocumentationError') {
         const docError = error as ReturnType<typeof createDocumentationError>;
         console.error('Error:', docError.toUserMessage());
