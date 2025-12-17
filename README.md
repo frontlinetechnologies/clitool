@@ -1,6 +1,36 @@
 # @testarion/clitool
 
-CLI tool for crawling web applications to discover pages, forms, buttons, and input fields.
+[![npm version](https://img.shields.io/npm/v/@testarion/clitool.svg)](https://www.npmjs.com/package/@testarion/clitool)
+[![License: O'Saasy](https://img.shields.io/badge/License-O'Saasy-blue.svg)](LICENSE)
+[![Node.js Version](https://img.shields.io/node/v/@testarion/clitool.svg)](package.json)
+
+AI-powered CLI tool for crawling web applications and generating E2E tests. Built for indie SaaS founders who need reliable testing without enterprise budgets.
+
+**Features:**
+- Crawl web apps to discover pages, forms, buttons, and input fields
+- Generate Markdown documentation of site structure
+- Generate Playwright E2E test scripts with AI-enhanced scenarios
+
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Crawl](#crawl)
+  - [Generate Documentation](#generate-documentation)
+  - [Generate Tests](#generate-tests)
+- [API Key Configuration](#api-key-configuration)
+- [Development](#development)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Quick Start
+
+```bash
+# No installation required
+npx @testarion/clitool crawl https://example.com
+```
 
 ## Installation
 
@@ -17,13 +47,13 @@ npm run build
 
 ## Usage
 
-### Basic Crawl
+### Crawl
 
 ```bash
 crawl https://example.com
 ```
 
-### Options
+**Options:**
 
 - `--quiet`: Suppress progress updates
 - `--format <json|text>`: Output format (default: json)
@@ -31,7 +61,7 @@ crawl https://example.com
 - `--rate-limit <seconds>`: Delay between requests in seconds (default: 1.5)
 - `--output <file>`: Save results to file
 
-### Examples
+**Examples:**
 
 ```bash
 # Basic crawl with JSON output
@@ -74,7 +104,7 @@ npm run crawl https://example.com | npm run generate-docs -- --output docs.md
 npm run crawl https://example.com | npm run generate-docs -- --anthropic-api-key your-api-key --output docs.md
 ```
 
-### Generate Docs Options
+**Options:**
 
 - `--output <file>`: Save documentation to file instead of stdout
 - `--anthropic-api-key <key>`: Anthropic API key for AI-generated page descriptions
@@ -113,7 +143,7 @@ npm run crawl https://example.com | npm run generate-tests
 npm run crawl https://example.com | npm run generate-tests -- --anthropic-api-key your-api-key
 ```
 
-### Generate Tests Options
+**Options:**
 
 - `--output-dir <directory>`: Output directory for test files (default: `./tests/generated/`)
 - `--anthropic-api-key <key>`: Anthropic API key for AI-enhanced test scenarios
@@ -126,9 +156,9 @@ The `generate-tests` command reads crawl results JSON from stdin and generates P
 - Login flow tests (when email/password fields detected)
 - Checkout flow tests (when payment fields detected)
 - Specific scenario tests (e.g., coupon codes when detected)
-- AI-enhanced test scenarios and assertions (when API key is available via `--anthropic-api-key` parameter or `ANTHROPIC_API_KEY` environment variable)
+- AI-enhanced test scenarios and assertions (when API key is available)
 
-**Example Generated Test File**:
+**Example Generated Test File:**
 
 ```typescript
 import { test, expect } from '@playwright/test';
@@ -149,10 +179,10 @@ test.describe('Login Flow', () => {
 });
 ```
 
-**Running Generated Tests**:
+**Running Generated Tests:**
 
 ```bash
-# Install Playwright if not already installed
+# Install Playwright browsers (required)
 npx playwright install
 
 # Run all generated tests
@@ -161,60 +191,6 @@ npx playwright test tests/generated/
 # Run specific test file
 npx playwright test tests/generated/login-flow.spec.ts
 ```
-
-## Development
-
-### Build
-
-```bash
-npm run build
-```
-
-### Test
-
-```bash
-npm test
-npm run test:coverage
-```
-
-### Lint
-
-```bash
-npm run lint
-npm run lint:fix
-```
-
-## Features
-
-### Crawl Command
-
-- Discovers all accessible pages starting from a URL
-- Identifies forms, buttons, and input fields
-- Respects robots.txt rules
-- Implements rate limiting
-- Provides real-time progress updates
-- Outputs results in JSON or human-readable text format
-- Handles interruptions gracefully
-
-### Generate Docs Command
-
-- Generates human-readable Markdown documentation from crawl results
-- Identifies site structure and navigation paths
-- Detects critical user flows (login, checkout, form submissions)
-- Provides AI-powered page descriptions (requires `--anthropic-api-key` parameter or `ANTHROPIC_API_KEY` environment variable)
-- Handles empty results gracefully
-- Outputs to stdout or file
-
-### Generate Tests Command
-
-- Generates Playwright end-to-end test scripts from crawl results
-- Organizes tests by user flow (one file per flow)
-- Detects and tests critical flows (login, checkout, form submissions)
-- Generates realistic test data (emails, passwords, coupon codes, etc.)
-- Identifies specific scenarios (coupon codes, promo codes)
-- Provides AI-enhanced test scenarios and assertions (requires `--anthropic-api-key` parameter or `ANTHROPIC_API_KEY` environment variable)
-- Handles empty results gracefully
-- Outputs valid, runnable Playwright test files
 
 ## API Key Configuration
 
@@ -267,8 +243,68 @@ When you provide an API key via CLI or environment variable, the tool offers to 
 - Add `.testarion/` to your `.gitignore` to avoid committing API keys
 - API keys must start with `sk-ant-` prefix (format is validated)
 
+## Development
+
+### Build
+
+```bash
+npm run build
+```
+
+### Test
+
+```bash
+npm test
+npm run test:coverage
+```
+
+### Lint
+
+```bash
+npm run lint
+npm run lint:fix
+```
+
+## Troubleshooting
+
+### Playwright browser not installed
+
+If you see an error about missing browsers when running generated tests:
+
+```bash
+npx playwright install
+```
+
+### API key validation errors
+
+Ensure your API key:
+- Starts with `sk-ant-` prefix
+- Is not expired
+- Has sufficient credits
+
+### Rate limiting errors
+
+If crawling fails due to rate limits, increase the delay:
+
+```bash
+crawl https://example.com --rate-limit 3.0
+```
+
+### Empty crawl results
+
+- Check that the URL is accessible
+- Verify the site doesn't block automated requests
+- Try running with `--verbose` for more details
+
+## Contributing
+
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## License
+
+This project is licensed under the [O'Saasy License](LICENSE) - MIT with SaaS rights reserved.
+
 ## Requirements
 
 - Node.js >= 18.0.0
 - TypeScript 5.x
-
