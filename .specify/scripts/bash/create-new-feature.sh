@@ -149,6 +149,29 @@ check_existing_branches() {
     echo $((max_num + 1))
 }
 
+# Function to check if a spec prefix already exists
+check_prefix_conflict() {
+    local specs_dir="$1"
+    local prefix="$2"
+
+    if [ -d "$specs_dir" ]; then
+        for dir in "$specs_dir"/*; do
+            [ -d "$dir" ] || continue
+            dirname=$(basename "$dir")
+            existing_prefix=$(echo "$dirname" | grep -o '^[0-9]\+' || echo "")
+            if [ -n "$existing_prefix" ]; then
+                # Compare as integers (handle leading zeros)
+                if [ "$((10#$existing_prefix))" -eq "$((10#$prefix))" ]; then
+                    echo "$dirname"
+                    return 0
+                fi
+            fi
+        done
+    fi
+    echo ""
+    return 1
+}
+
 # Function to clean and format a branch name
 clean_branch_name() {
     local name="$1"
@@ -248,6 +271,23 @@ fi
 
 # Force base-10 interpretation to prevent octal conversion (e.g., 010 → 8 in octal, but should be 10 in decimal)
 FEATURE_NUM=$(printf "%03d" "$((10#$BRANCH_NUMBER))")
+
+# Check for prefix conflicts with existing spec directories
+CONFLICT_DIR=$(check_prefix_conflict "$SPECS_DIR" "$FEATURE_NUM")
+if [ -n "$CONFLICT_DIR" ]; then
+    echo "Error: Spec prefix $FEATURE_NUM already exists: specs/$CONFLICT_DIR" >&2
+    echo "" >&2
+    echo "Options:" >&2
+    echo "  1. Use a different number: --number <N>" >&2
+    echo "  2. Delete or rename the existing spec directory" >&2
+    echo "  3. Let the script auto-assign the next available number (remove --number flag)" >&2
+    echo "" >&2
+    # Calculate next available
+    NEXT_AVAILABLE=$(check_existing_branches "$SPECS_DIR")
+    echo "Next available number: $NEXT_AVAILABLE" >&2
+    exit 1
+fi
+
 BRANCH_NAME="${FEATURE_NUM}-${BRANCH_SUFFIX}"
 
 # GitHub enforces a 244-byte limit on branch names

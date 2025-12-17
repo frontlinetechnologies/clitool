@@ -147,7 +147,7 @@ export function writeConfigFile(filePath: string, apiKey: string): void {
     try {
       if (fs.existsSync(filePath)) {
         const content = fs.readFileSync(filePath, 'utf-8');
-        existingConfig = JSON.parse(content);
+        existingConfig = JSON.parse(content) as ConfigFile;
       }
     } catch {
       // Ignore parse errors - we'll overwrite the file

@@ -4,16 +4,27 @@ import { generateDocumentation } from '../../../src/documentation/doc-generator'
 import { CrawlResultsInput } from '../../../src/documentation/models';
 import { Page } from '../../../src/models/page';
 import { CrawlSummary } from '../../../src/models/crawl-summary';
+import { Form } from '../../../src/models/form';
+import { Button } from '../../../src/models/button';
+import { InputField } from '../../../src/models/input-field';
+
+interface RawCrawlFixture {
+  summary: CrawlSummary;
+  pages: Page[];
+  forms?: Form[];
+  buttons?: Button[];
+  inputFields?: InputField[];
+}
 
 describe('Flow Documentation Integration', () => {
   it('should generate documentation with critical flows', async () => {
     const fixturePath = path.join(__dirname, '../../fixtures/crawl-results/sample-with-flows.json');
     const fixtureContent = fs.readFileSync(fixturePath, 'utf-8');
-    const jsonData = JSON.parse(fixtureContent);
+    const jsonData = JSON.parse(fixtureContent) as RawCrawlFixture;
 
     const crawlResults: CrawlResultsInput = {
-      summary: jsonData.summary as CrawlSummary,
-      pages: jsonData.pages as Page[],
+      summary: jsonData.summary,
+      pages: jsonData.pages,
       forms: jsonData.forms || [],
       buttons: jsonData.buttons || [],
       inputFields: jsonData.inputFields || [],
@@ -33,11 +44,11 @@ describe('Flow Documentation Integration', () => {
   it('should detect checkout flow from payment fields', async () => {
     const fixturePath = path.join(__dirname, '../../fixtures/crawl-results/sample-with-flows.json');
     const fixtureContent = fs.readFileSync(fixturePath, 'utf-8');
-    const jsonData = JSON.parse(fixtureContent);
+    const jsonData = JSON.parse(fixtureContent) as RawCrawlFixture;
 
     const crawlResults: CrawlResultsInput = {
-      summary: jsonData.summary as CrawlSummary,
-      pages: jsonData.pages as Page[],
+      summary: jsonData.summary,
+      pages: jsonData.pages,
       forms: jsonData.forms || [],
       buttons: jsonData.buttons || [],
       inputFields: jsonData.inputFields || [],
@@ -53,11 +64,11 @@ describe('Flow Documentation Integration', () => {
   it('should update summary with critical flows count', async () => {
     const fixturePath = path.join(__dirname, '../../fixtures/crawl-results/sample-with-flows.json');
     const fixtureContent = fs.readFileSync(fixturePath, 'utf-8');
-    const jsonData = JSON.parse(fixtureContent);
+    const jsonData = JSON.parse(fixtureContent) as RawCrawlFixture;
 
     const crawlResults: CrawlResultsInput = {
-      summary: jsonData.summary as CrawlSummary,
-      pages: jsonData.pages as Page[],
+      summary: jsonData.summary,
+      pages: jsonData.pages,
       forms: jsonData.forms || [],
       buttons: jsonData.buttons || [],
       inputFields: jsonData.inputFields || [],

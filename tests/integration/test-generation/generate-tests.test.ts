@@ -27,12 +27,12 @@ describe('Generate Tests Integration', () => {
 
       expect(result.testFiles).toHaveLength(1);
       expect(result.testFiles[0].filename).toBe('empty-results.spec.ts');
-      expect(result.testFiles[0].code).toContain('No pages were found in the crawl results');
+      expect(result.testFiles[0].code).toContain('no pages were discovered during the crawl');
       expect(result.summary.totalTestFiles).toBe(1);
       expect(result.summary.pagesTested).toBe(0);
     });
 
-    it('should generate placeholder test that always passes', async () => {
+    it('should generate skipped test for empty results (no trivial assertions)', async () => {
       const crawlResults: CrawlResultsInput = {
         summary: baseSummary,
         pages: [],
@@ -43,7 +43,9 @@ describe('Generate Tests Integration', () => {
 
       const result = await generateTestSuite(crawlResults, './tests/generated');
 
-      expect(result.testFiles[0].code).toContain('expect(true).toBe(true)');
+      // Should use test.skip instead of trivial expect(true).toBe(true)
+      expect(result.testFiles[0].code).toContain('test.skip');
+      expect(result.testFiles[0].code).not.toContain('expect(true).toBe(true)');
     });
   });
 

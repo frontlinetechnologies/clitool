@@ -42,7 +42,7 @@ export class PageProcessor {
     }
 
     const page = createPage(url, 0, new Date());
-    let links: string[] = [];
+    const links: string[] = [];
 
     try {
       const playwrightPage = await this.browser!.newPage();

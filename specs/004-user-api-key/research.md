@@ -168,3 +168,5 @@
 - Missing key (verbose mode): "No API key configured. Set ANTHROPIC_API_KEY, use --anthropic-api-key, or create config file"
 - API authentication errors: "Invalid API key. Please verify your Anthropic API key is correct."
 
+
+

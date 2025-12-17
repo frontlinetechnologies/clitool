@@ -4,6 +4,11 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import {
+  initializePromptLoader,
+  loadAndRenderPrompt,
+  isPromptError,
+} from '../prompts';
 
 const DEFAULT_MODEL = 'claude-sonnet-4-5-20250929';
 
@@ -61,6 +66,7 @@ export function initializeClient(apiKey?: string): Anthropic | null {
  * @param pageTitle - Title of the page (optional)
  * @param pageContent - HTML content or text content of the page (optional)
  * @param apiKey - Optional API key. If provided, takes precedence over environment variable.
+ * @param verbose - Whether to enable verbose logging
  * @returns Promise resolving to description string or null on failure
  */
 export async function analyzePage(
@@ -68,6 +74,7 @@ export async function analyzePage(
   pageTitle?: string,
   pageContent?: string,
   apiKey?: string,
+  verbose?: boolean,
 ): Promise<string | null> {
   const apiClient = initializeClient(apiKey);
   if (!apiClient) {
@@ -75,16 +82,30 @@ export async function analyzePage(
   }
 
   try {
-    // Build prompt for page analysis
-    const prompt = buildAnalysisPrompt(pageUrl, pageTitle, pageContent);
+    // Initialize prompt loader
+    initializePromptLoader({ verbose });
+
+    // Load and render prompt from external file
+    const { renderedContent, maxTokens } = await loadAndRenderPrompt('page-analysis', {
+      variables: {
+        url: pageUrl,
+        title: pageTitle,
+        content: pageContent
+          ? pageContent.length > 2000
+            ? pageContent.substring(0, 2000) + '...'
+            : pageContent
+          : undefined,
+      },
+      verbose,
+    });
 
     const response = await apiClient.messages.create({
       model: DEFAULT_MODEL,
-      max_tokens: 500,
+      max_tokens: maxTokens,
       messages: [
         {
           role: 'user',
-          content: prompt,
+          content: renderedContent,
         },
       ],
     });
@@ -97,41 +118,58 @@ export async function analyzePage(
 
     return null;
   } catch (error) {
+    // Log prompt errors for debugging
+    if (isPromptError(error)) {
+      if (verbose) {
+        console.error(`Prompt error: ${error.message}`);
+        if (error.suggestions.length > 0) {
+          console.error(`Suggestions: ${error.suggestions.join(', ')}`);
+        }
+      }
+    }
     // Gracefully handle API errors - return null to trigger fallback
     return null;
   }
 }
 
+
 /**
- * Builds the analysis prompt for Anthropic API.
+ * Locator types supported by Playwright (in priority order).
  */
-function buildAnalysisPrompt(pageUrl: string, pageTitle?: string, pageContent?: string): string {
-  let prompt = `Analyze this web page and provide a brief, human-readable description (2-3 sentences) of what this page is about and its primary purpose.\n\n`;
-  prompt += `URL: ${pageUrl}\n`;
+export type AILocatorType = 'role' | 'label' | 'placeholder' | 'text' | 'testid' | 'name' | 'css';
 
-  if (pageTitle) {
-    prompt += `Title: ${pageTitle}\n`;
-  }
+/**
+ * Structured step from AI response.
+ */
+export interface AITestStep {
+  action: 'goto' | 'fill' | 'click' | 'wait' | 'select';
+  target?: string; // URL for goto action
+  locatorType?: AILocatorType;
+  locatorValue?: string;
+  options?: Record<string, string>; // e.g., { name: 'Submit' } for role locator
+  value?: string; // Value for fill/select actions
+}
 
-  if (pageContent) {
-    // Limit content length to avoid token limits
-    const contentPreview = pageContent.length > 2000 ? pageContent.substring(0, 2000) + '...' : pageContent;
-    prompt += `\nContent preview:\n${contentPreview}`;
-  }
-
-  prompt += `\n\nProvide a concise description focusing on the page's purpose and main functionality.`;
-
-  return prompt;
+/**
+ * Structured assertion from AI response.
+ */
+export interface AITestAssertion {
+  type: 'url' | 'title' | 'visible' | 'hidden' | 'text' | 'value' | 'enabled' | 'disabled';
+  expected?: string; // Expected value for url, title, text assertions
+  locatorType?: AILocatorType;
+  locatorValue?: string;
+  description?: string; // Human-readable description
 }
 
 /**
  * Interface for AI-generated test scenario suggestions.
+ * Supports both legacy string arrays and new structured format.
  */
 export interface AITestScenarioSuggestion {
   name: string;
   description: string;
-  steps: string[];
-  assertions: string[];
+  steps: AITestStep[] | string[]; // New structured format or legacy strings
+  assertions: AITestAssertion[] | string[]; // New structured format or legacy strings
 }
 
 /**
@@ -142,6 +180,7 @@ export interface AITestScenarioSuggestion {
  * @param flowPages - Array of page URLs in the flow
  * @param formFields - Description of form fields
  * @param apiKey - Optional API key. If provided, takes precedence over environment variable.
+ * @param verbose - Whether to enable verbose logging
  * @returns Promise resolving to test scenario suggestions or null on failure
  */
 export async function analyzeFlowForTests(
@@ -149,6 +188,7 @@ export async function analyzeFlowForTests(
   flowPages: string[],
   formFields: string[],
   apiKey?: string,
+  verbose?: boolean,
 ): Promise<AITestScenarioSuggestion[] | null> {
   const apiClient = initializeClient(apiKey);
   if (!apiClient) {
@@ -156,15 +196,26 @@ export async function analyzeFlowForTests(
   }
 
   try {
-    const prompt = buildTestAnalysisPrompt(flowType, flowPages, formFields);
+    // Initialize prompt loader
+    initializePromptLoader({ verbose });
+
+    // Load and render prompt from external file
+    const { renderedContent, maxTokens } = await loadAndRenderPrompt('test-scenario-generation', {
+      variables: {
+        flow_type: flowType,
+        pages: flowPages.join(' -> '),
+        form_fields: formFields.join(', '),
+      },
+      verbose,
+    });
 
     const response = await apiClient.messages.create({
       model: DEFAULT_MODEL,
-      max_tokens: 1000,
+      max_tokens: maxTokens,
       messages: [
         {
           role: 'user',
-          content: prompt,
+          content: renderedContent,
         },
       ],
     });
@@ -176,61 +227,74 @@ export async function analyzeFlowForTests(
 
     return null;
   } catch (error) {
+    // Log prompt errors for debugging
+    if (isPromptError(error)) {
+      if (verbose) {
+        console.error(`Prompt error: ${error.message}`);
+        if (error.suggestions.length > 0) {
+          console.error(`Suggestions: ${error.suggestions.join(', ')}`);
+        }
+      }
+    }
     // Gracefully handle API errors - return null to trigger fallback
     return null;
   }
 }
 
+
 /**
- * Builds the prompt for test scenario analysis.
+ * Raw parsed item from AI JSON response.
  */
-function buildTestAnalysisPrompt(flowType: string, flowPages: string[], formFields: string[]): string {
-  let prompt = `Analyze this web flow and suggest additional test scenarios.
+interface RawTestSuggestion {
+  name?: string;
+  description?: string;
+  steps?: unknown[];
+  assertions?: unknown[];
+}
 
-Flow Type: ${flowType}
-Pages in flow: ${flowPages.join(' -> ')}
-Form fields: ${formFields.join(', ')}
+/**
+ * Raw step from AI JSON response.
+ */
+interface RawTestStep {
+  action?: string;
+  target?: string;
+  locatorType?: string;
+  locatorValue?: string;
+  options?: Record<string, string>;
+  value?: string;
+}
 
-Generate 1-2 additional test scenarios that would be valuable for this flow. For each scenario, provide:
-- A descriptive name
-- A brief description
-- Key test steps
-- Important assertions to verify
-
-Focus on:
-1. Error handling (invalid inputs, edge cases)
-2. User experience (clear feedback, validation messages)
-3. Security considerations (if applicable)
-
-Format your response as JSON:
-[
-  {
-    "name": "scenario name",
-    "description": "brief description",
-    "steps": ["step 1", "step 2"],
-    "assertions": ["assertion 1", "assertion 2"]
-  }
-]`;
-
-  return prompt;
+/**
+ * Raw assertion from AI JSON response.
+ */
+interface RawTestAssertion {
+  type?: string;
+  expected?: string;
+  locatorType?: string;
+  locatorValue?: string;
+  description?: string;
 }
 
 /**
  * Parses AI response into test scenario suggestions.
+ * Handles both new structured format and legacy string arrays.
  */
 function parseTestSuggestions(response: string): AITestScenarioSuggestion[] | null {
   try {
     // Try to extract JSON from the response
     const jsonMatch = response.match(/\[[\s\S]*\]/);
     if (jsonMatch) {
-      const parsed = JSON.parse(jsonMatch[0]);
+      const parsed: unknown = JSON.parse(jsonMatch[0]);
       if (Array.isArray(parsed)) {
-        return parsed.map((item: any) => ({
-          name: item.name || 'AI Suggested Test',
-          description: item.description || '',
-          steps: Array.isArray(item.steps) ? item.steps : [],
-          assertions: Array.isArray(item.assertions) ? item.assertions : [],
-        }));
+        return parsed.map((item: unknown) => {
+          const suggestion = item as RawTestSuggestion;
+          return {
+            name: suggestion.name || 'AI Suggested Test',
+            description: suggestion.description || '',
+            steps: parseSteps(suggestion.steps),
+            assertions: parseAssertions(suggestion.assertions),
+          };
+        });
       }
     }
     return null;
@@ -240,18 +304,75 @@ function parseTestSuggestions(response: string): AITestScenarioSuggestion[] | nu
 }
 
 /**
+ * Parses steps from AI response, handling both structured and legacy formats.
+ */
+function parseSteps(steps: unknown[] | undefined): AITestStep[] | string[] {
+  if (!Array.isArray(steps)) {
+    return [];
+  }
+
+  // Check if it's structured format (objects with action property)
+  const firstStep = steps[0] as RawTestStep | string | undefined;
+  if (steps.length > 0 && typeof firstStep === 'object' && firstStep !== null && 'action' in firstStep) {
+    return steps.map((step: unknown) => {
+      const s = step as RawTestStep;
+      return {
+        action: (s.action as AITestStep['action']) || 'wait',
+        target: s.target,
+        locatorType: s.locatorType as AILocatorType | undefined,
+        locatorValue: s.locatorValue,
+        options: s.options,
+        value: s.value,
+      };
+    });
+  }
+
+  // Legacy format: array of strings
+  return steps.filter((s: unknown): s is string => typeof s === 'string');
+}
+
+/**
+ * Parses assertions from AI response, handling both structured and legacy formats.
+ */
+function parseAssertions(assertions: unknown[] | undefined): AITestAssertion[] | string[] {
+  if (!Array.isArray(assertions)) {
+    return [];
+  }
+
+  // Check if it's structured format (objects with type property)
+  const firstAssertion = assertions[0] as RawTestAssertion | string | undefined;
+  if (assertions.length > 0 && typeof firstAssertion === 'object' && firstAssertion !== null && 'type' in firstAssertion) {
+    return assertions.map((assertion: unknown) => {
+      const a = assertion as RawTestAssertion;
+      return {
+        type: (a.type as AITestAssertion['type']) || 'visible',
+        expected: a.expected,
+        locatorType: a.locatorType as AILocatorType | undefined,
+        locatorValue: a.locatorValue,
+        description: a.description,
+      };
+    });
+  }
+
+  // Legacy format: array of strings
+  return assertions.filter((a: unknown): a is string => typeof a === 'string');
+}
+
+/**
  * Generates AI-enhanced test data for a specific field type and context.
  * Returns null if API is unavailable, triggering fallback to pattern-based generation.
  *
  * @param fieldType - Type of the field (email, password, text, etc.)
  * @param context - Additional context about the field (name, placeholder, etc.)
  * @param apiKey - Optional API key. If provided, takes precedence over environment variable.
+ * @param verbose - Whether to enable verbose logging
  * @returns Promise resolving to enhanced test data or null on failure
  */
 export async function generateEnhancedTestData(
   fieldType: string,
   context: string,
   apiKey?: string,
+  verbose?: boolean,
 ): Promise<string | null> {
   const apiClient = initializeClient(apiKey);
   if (!apiClient) {
@@ -259,16 +380,25 @@ export async function generateEnhancedTestData(
   }
 
   try {
-    const prompt = `Generate a realistic test value for a ${fieldType} field with context: ${context}. 
-Respond with just the value, no explanation. For example, for an email field, respond with just "john.doe@example.com".`;
+    // Initialize prompt loader
+    initializePromptLoader({ verbose });
+
+    // Load and render prompt from external file
+    const { renderedContent, maxTokens } = await loadAndRenderPrompt('test-data-generation', {
+      variables: {
+        field_type: fieldType,
+        context: context,
+      },
+      verbose,
+    });
 
     const response = await apiClient.messages.create({
       model: DEFAULT_MODEL,
-      max_tokens: 100,
+      max_tokens: maxTokens,
       messages: [
         {
           role: 'user',
-          content: prompt,
+          content: renderedContent,
         },
       ],
     });
@@ -280,6 +410,15 @@ Respond with just the value, no explanation. For example, for an email field, re
 
     return null;
   } catch (error) {
+    // Log prompt errors for debugging
+    if (isPromptError(error)) {
+      if (verbose) {
+        console.error(`Prompt error: ${error.message}`);
+        if (error.suggestions.length > 0) {
+          console.error(`Suggestions: ${error.suggestions.join(', ')}`);
+        }
+      }
+    }
     return null;
   }
 }

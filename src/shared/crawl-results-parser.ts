@@ -13,6 +13,67 @@ import { InputField } from '../models/input-field';
 import { CrawlSummary } from '../models/crawl-summary';
 
 /**
+ * Raw JSON structure for crawl results input.
+ */
+interface RawCrawlResults {
+  summary?: RawCrawlSummary;
+  pages?: RawPage[];
+  forms?: RawForm[];
+  buttons?: RawButton[];
+  inputFields?: RawInputField[];
+}
+
+interface RawCrawlSummary {
+  totalPages?: number;
+  totalForms?: number;
+  totalButtons?: number;
+  totalInputFields?: number;
+  errors?: number;
+  skipped?: number;
+  interrupted?: boolean;
+  startTime?: string;
+  endTime?: string;
+  duration?: number;
+}
+
+interface RawPage {
+  url: string;
+  status: number;
+  title?: string;
+  discoveredAt: string;
+  processedAt?: string;
+  links?: string[];
+  error?: string;
+}
+
+interface RawForm {
+  id?: string;
+  action: string;
+  method: string;
+  pageUrl: string;
+  inputFields?: RawInputField[];
+}
+
+interface RawButton {
+  type: string;
+  text?: string;
+  id?: string;
+  className?: string;
+  pageUrl: string;
+  formId?: string;
+}
+
+interface RawInputField {
+  type: string;
+  name?: string;
+  id?: string;
+  required?: boolean;
+  placeholder?: string;
+  pageUrl: string;
+  formId?: string;
+}
+
+/**
  * Error handler configuration for creating domain-specific errors.
  */
 export interface ErrorHandlerConfig {
@@ -59,7 +120,7 @@ export function createCrawlResultsParser(errorConfig: ErrorHandlerConfig) {
   return async function parseCrawlResults(): Promise<CrawlResultsInput> {
     try {
       const inputText = await readStdin();
-      const jsonData = JSON.parse(inputText);
+      const jsonData = JSON.parse(inputText) as RawCrawlResults;
 
       // Validate required fields
       if (!jsonData.summary || !jsonData.pages) {
@@ -69,21 +130,22 @@ export function createCrawlResultsParser(errorConfig: ErrorHandlerConfig) {
       }
 
       // Parse summary
+      const rawSummary = jsonData.summary;
       const summary: CrawlSummary = {
-        totalPages: jsonData.summary.totalPages ?? 0,
-        totalForms: jsonData.summary.totalForms ?? 0,
-        totalButtons: jsonData.summary.totalButtons ?? 0,
-        totalInputFields: jsonData.summary.totalInputFields ?? 0,
-        errors: jsonData.summary.errors ?? 0,
-        skipped: jsonData.summary.skipped ?? 0,
-        interrupted: jsonData.summary.interrupted ?? false,
-        startTime: jsonData.summary.startTime,
-        endTime: jsonData.summary.endTime ?? undefined,
-        duration: jsonData.summary.duration ?? undefined,
+        totalPages: rawSummary.totalPages ?? 0,
+        totalForms: rawSummary.totalForms ?? 0,
+        totalButtons: rawSummary.totalButtons ?? 0,
+        totalInputFields: rawSummary.totalInputFields ?? 0,
+        errors: rawSummary.errors ?? 0,
+        skipped: rawSummary.skipped ?? 0,
+        interrupted: rawSummary.interrupted ?? false,
+        startTime: rawSummary.startTime ?? '',
+        endTime: rawSummary.endTime ?? undefined,
+        duration: rawSummary.duration ?? undefined,
       };
 
       // Parse pages
-      const pages: Page[] = (jsonData.pages || []).map((page: any) => ({
+      const pages: Page[] = (jsonData.pages || []).map((page: RawPage) => ({
         url: page.url,
         status: page.status,
         title: page.title ?? undefined,
@@ -94,12 +156,12 @@ export function createCrawlResultsParser(errorConfig: ErrorHandlerConfig) {
       }));
 
       // Parse optional arrays
-      const forms: Form[] = (jsonData.forms || []).map((form: any) => ({
+      const forms: Form[] = (jsonData.forms || []).map((form: RawForm) => ({
         id: form.id ?? undefined,
         action: form.action,
         method: form.method,
         pageUrl: form.pageUrl,
-        inputFields: form.inputFields?.map((field: any) => ({
+        inputFields: form.inputFields?.map((field: RawInputField) => ({
           type: field.type,
           name: field.name ?? undefined,
           id: field.id ?? undefined,
@@ -110,7 +172,7 @@ export function createCrawlResultsParser(errorConfig: ErrorHandlerConfig) {
         })),
       }));
 
-      const buttons: Button[] = (jsonData.buttons || []).map((button: any) => ({
+      const buttons: Button[] = (jsonData.buttons || []).map((button: RawButton) => ({
         type: button.type,
         text: button.text ?? undefined,
         id: button.id ?? undefined,
@@ -119,7 +181,7 @@ export function createCrawlResultsParser(errorConfig: ErrorHandlerConfig) {
         formId: button.formId ?? undefined,
       }));
 
-      const inputFields: InputField[] = (jsonData.inputFields || []).map((field: any) => ({
+      const inputFields: InputField[] = (jsonData.inputFields || []).map((field: RawInputField) => ({
         type: field.type,
         name: field.name ?? undefined,
         id: field.id ?? undefined,

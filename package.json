@@ -6,7 +6,8 @@
   "bin": {
     "crawl": "./dist/cli/crawl.js",
     "generate-docs": "./dist/cli/generate-docs.js",
-    "generate-tests": "./dist/cli/generate-tests.js"
+    "generate-tests": "./dist/cli/generate-tests.js",
+    "reset-prompts": "./dist/cli/reset-prompts.js"
   },
   "scripts": {
     "build": "tsc",
@@ -37,6 +38,10 @@
     "playwright": "^1.40.0",
     "robots-parser": "^3.0.0"
   },
+  "files": [
+    "dist",
+    "prompts/defaults"
+  ],
   "devDependencies": {
     "@playwright/test": "^1.40.0",
     "@types/jest": "^29.5.8",

@@ -2,7 +2,7 @@ import { createCrawlSummary } from '../../src/models/crawl-summary';
 
 // Mock HTTP server would be ideal, but for now we'll use a simple test
 describe('Crawler Integration', () => {
-  it('should perform basic crawl flow', async () => {
+  it('should perform basic crawl flow', () => {
     // This is a placeholder test - full integration test would require
     // a mock HTTP server or test fixtures
     const summary = createCrawlSummary();

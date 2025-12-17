@@ -15,12 +15,14 @@ import {
   Assertion,
   TestGenerationSummary,
   SpecificScenario,
+  LocatorType,
+  AssertionType,
 } from './models';
 import { detectCriticalFlows } from '../documentation/flow-detector';
 import { generateFlowFilename, generateNavigationFilename, generateEmptyResultsFilename } from './test-file-organizer';
 import { generateTestData, generateTestDataForField, generateCouponCode } from './test-data-generator';
 import { generatePlaywrightCode } from './playwright-codegen';
-import { analyzeFlowForTests, AITestScenarioSuggestion } from '../ai/anthropic-client';
+import { analyzeFlowForTests, AITestScenarioSuggestion, AITestStep, AITestAssertion } from '../ai/anthropic-client';
 import { UserFlow } from '../documentation/models';
 
 /**
@@ -112,19 +114,19 @@ export async function generateTestSuite(
  */
 function generateEmptyTestSuite(outputDirectory: string): GeneratedTestSuite {
   const filename = generateEmptyResultsFilename();
-  const code = `import { test, expect } from '@playwright/test';
+  const code = `import { test } from '@playwright/test';
 
 test.describe('Empty Results', () => {
-  test('no pages found in crawl results', async ({ page }) => {
-    // No pages were found in the crawl results.
-    // This test file was generated to indicate that the crawl did not discover any pages.
+  test.skip('no pages found - crawl returned empty results', async () => {
+    // This test is skipped because no pages were discovered during the crawl.
+    //
     // Please verify that:
     // 1. The crawl command completed successfully
     // 2. The target URL is accessible
     // 3. The site allows crawling (check robots.txt)
-    
-    // This is a placeholder test that will always pass
-    expect(true).toBe(true);
+    // 4. The URL points to a page with crawlable content
+    //
+    // Re-run the crawl after addressing these issues.
   });
 });
 `;
@@ -133,13 +135,13 @@ test.describe('Empty Results', () => {
     filename,
     testCases: [
       {
-        name: 'no pages found in crawl results',
+        name: 'no pages found - crawl returned empty results',
         type: 'basic',
         steps: [],
         assertions: [],
       },
     ],
-    imports: ["import { test, expect } from '@playwright/test';"],
+    imports: ["import { test } from '@playwright/test';"],
     code,
   };
 
@@ -807,24 +809,17 @@ function getFormFieldsForFlow(flow: UserFlow, crawlResults: CrawlResultsInput): 
 
 /**
  * Converts an AI suggestion to a TestCase object.
+ * Handles both structured format (new) and legacy string arrays.
  *
  * @param suggestion - AI-generated test scenario suggestion
  * @returns TestCase object
  */
 function convertAISuggestionToTestCase(suggestion: AITestScenarioSuggestion): TestCase {
   // Convert AI steps to TestStep objects
-  const steps: TestStep[] = suggestion.steps.map((stepDesc, index) => ({
-    action: 'wait' as const, // Default action - actual parsing would need more sophisticated logic
-    target: stepDesc,
-    order: index + 1,
-  }));
+  const steps: TestStep[] = convertAISteps(suggestion.steps);
 
   // Convert AI assertions to Assertion objects
-  const assertions: Assertion[] = suggestion.assertions.map((assertionDesc) => ({
-    type: 'visible' as const, // Default type - actual parsing would need more sophisticated logic
-    target: assertionDesc,
-    expected: assertionDesc,
-  }));
+  const assertions: Assertion[] = convertAIAssertions(suggestion.assertions);
 
   return {
     name: suggestion.name,
@@ -832,5 +827,128 @@ function convertAISuggestionToTestCase(suggestion: AITestScenarioSuggestion): Te
     steps,
     assertions,
   };
+}
+
+/**
+ * Converts AI steps to TestStep objects.
+ * Handles both structured and legacy string formats.
+ */
+function convertAISteps(aiSteps: AITestStep[] | string[]): TestStep[] {
+  if (!aiSteps || aiSteps.length === 0) {
+    return [];
+  }
+
+  // Check if structured format (objects with action)
+  if (typeof aiSteps[0] === 'object' && 'action' in aiSteps[0]) {
+    return (aiSteps as AITestStep[]).map((step, index) => ({
+      action: step.action,
+      target: step.target || step.locatorValue || '',
+      value: step.value,
+      locatorType: step.locatorType as LocatorType | undefined,
+      locatorValue: step.locatorValue,
+      locatorOptions: step.options,
+      order: index + 1,
+    }));
+  }
+
+  // Legacy format: parse strings to extract action and target
+  return (aiSteps as string[]).map((stepDesc, index) => {
+    const parsed = parseLegacyStep(stepDesc);
+    return {
+      action: parsed.action,
+      target: parsed.target,
+      value: parsed.value,
+      order: index + 1,
+    };
+  });
+}
+
+/**
+ * Parses a legacy step string to extract action and target.
+ */
+function parseLegacyStep(stepDesc: string): { action: TestStep['action']; target: string; value?: string } {
+  const lower = stepDesc.toLowerCase();
+
+  // Try to detect action from step description
+  if (lower.includes('navigate') || lower.includes('go to') || lower.includes('visit')) {
+    return { action: 'goto', target: stepDesc };
+  }
+  if (lower.includes('fill') || lower.includes('enter') || lower.includes('type') || lower.includes('input')) {
+    return { action: 'fill', target: stepDesc, value: '' };
+  }
+  if (lower.includes('click') || lower.includes('press') || lower.includes('tap') || lower.includes('submit')) {
+    return { action: 'click', target: stepDesc };
+  }
+  if (lower.includes('select') || lower.includes('choose') || lower.includes('pick')) {
+    return { action: 'select', target: stepDesc };
+  }
+
+  // Default to wait action for unrecognized steps
+  return { action: 'wait', target: stepDesc };
+}
+
+/**
+ * Converts AI assertions to Assertion objects.
+ * Handles both structured and legacy string formats.
+ */
+function convertAIAssertions(aiAssertions: AITestAssertion[] | string[]): Assertion[] {
+  if (!aiAssertions || aiAssertions.length === 0) {
+    return [];
+  }
+
+  // Check if structured format (objects with type)
+  if (typeof aiAssertions[0] === 'object' && 'type' in aiAssertions[0]) {
+    return (aiAssertions as AITestAssertion[]).map((assertion) => ({
+      type: assertion.type as AssertionType,
+      target: assertion.locatorValue || '',
+      expected: assertion.expected || '',
+      locatorType: assertion.locatorType as LocatorType | undefined,
+      locatorValue: assertion.locatorValue,
+      description: assertion.description,
+    }));
+  }
+
+  // Legacy format: parse strings to extract assertion type
+  return (aiAssertions as string[]).map((assertionDesc) => {
+    const parsed = parseLegacyAssertion(assertionDesc);
+    return {
+      type: parsed.type,
+      target: parsed.target,
+      expected: parsed.expected,
+    };
+  });
+}
+
+/**
+ * Parses a legacy assertion string to extract type and expected value.
+ */
+function parseLegacyAssertion(assertionDesc: string): { type: AssertionType; target: string; expected: string } {
+  const lower = assertionDesc.toLowerCase();
+
+  // Try to detect assertion type from description
+  if (lower.includes('url') || lower.includes('redirect') || lower.includes('navigate')) {
+    return { type: 'url', target: '', expected: assertionDesc };
+  }
+  if (lower.includes('title')) {
+    return { type: 'title', target: '', expected: assertionDesc };
+  }
+  if (lower.includes('hidden') || lower.includes('disappear') || lower.includes('not visible')) {
+    return { type: 'hidden', target: assertionDesc, expected: '' };
+  }
+  if (lower.includes('disabled') || lower.includes('cannot click')) {
+    return { type: 'disabled', target: assertionDesc, expected: '' };
+  }
+  if (lower.includes('enabled') || lower.includes('can click') || lower.includes('clickable')) {
+    return { type: 'enabled', target: assertionDesc, expected: '' };
+  }
+  if (lower.includes('text') || lower.includes('message') || lower.includes('display') || lower.includes('show')) {
+    return { type: 'text', target: assertionDesc, expected: assertionDesc };
+  }
+  if (lower.includes('value') || lower.includes('contain')) {
+    return { type: 'value', target: assertionDesc, expected: assertionDesc };
+  }
+
+  // Default to visible for generic assertions
+  return { type: 'visible', target: assertionDesc, expected: '' };
 }
 

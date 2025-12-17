@@ -14,6 +14,14 @@ import { formatAsText } from '../output/text-formatter';
 import * as fs from 'fs';
 import * as path from 'path';
 
+interface CrawlOptions {
+  quiet: boolean;
+  format: string;
+  verbose: boolean;
+  rateLimit: string;
+  output?: string;
+}
+
 const program = new Command();
 
 program
@@ -41,7 +49,7 @@ The crawler will:
 
 Press Ctrl+C to interrupt the crawl gracefully. Partial results will be saved.
   `)
-  .action(async (url: string, options) => {
+  .action(async (url: string, options: CrawlOptions) => {
     try {
       // Validate URL
       validateURL(url);

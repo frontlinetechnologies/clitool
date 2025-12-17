@@ -3,7 +3,7 @@
  * Generates test code with imports, test.describe, test cases, assertions per research.md structure.
  */
 
-import { TestFile, TestCase, TestStep, Assertion } from './models';
+import { TestFile, TestCase, TestStep, Assertion, LocatorType } from './models';
 
 /**
  * Generates Playwright TypeScript test code for a test file.
@@ -76,36 +76,55 @@ function generateTestStep(step: TestStep, indent: number): string[] {
 
   switch (step.action) {
     case 'goto':
-      lines.push(`${indentStr}await page.goto('${step.target}');`);
+      lines.push(`${indentStr}await page.goto('${escapeStringLiteral(step.target)}');`);
       break;
 
-    case 'fill':
-      const fillLocator = step.locator || generateLocator(step.target);
-      if (step.value) {
-        lines.push(`${indentStr}await ${fillLocator}.fill('${step.value}');`);
-      } else {
-        lines.push(`${indentStr}await ${fillLocator}.fill('');`);
-      }
+    case 'fill': {
+      const fillLocator = generateStepLocator(step);
+      const value = step.value ? escapeStringLiteral(step.value) : '';
+      lines.push(`${indentStr}await ${fillLocator}.fill('${value}');`);
       break;
+    }
 
-    case 'click':
-      const clickLocator = step.locator || generateLocator(step.target);
+    case 'click': {
+      const clickLocator = generateStepLocator(step);
       lines.push(`${indentStr}await ${clickLocator}.click();`);
       break;
+    }
 
     case 'wait':
       lines.push(`${indentStr}await page.waitForLoadState('networkidle');`);
       break;
 
-    case 'select':
-      const selectLocator = step.locator || generateLocator(step.target);
+    case 'select': {
+      const selectLocator = generateStepLocator(step);
       if (step.value) {
-        lines.push(`${indentStr}await ${selectLocator}.selectOption('${step.value}');`);
+        lines.push(`${indentStr}await ${selectLocator}.selectOption('${escapeStringLiteral(step.value)}');`);
       }
       break;
+    }
   }
 
   return lines;
+}
+
+/**
+ * Generates a locator string for a test step.
+ * Uses structured locator info when available, falls back to legacy locator or target.
+ */
+function generateStepLocator(step: TestStep): string {
+  // Use structured locator type if available
+  if (step.locatorType && step.locatorValue) {
+    return generateStructuredLocator(step.locatorType, step.locatorValue, step.locatorOptions);
+  }
+
+  // Fall back to legacy locator string
+  if (step.locator) {
+    return step.locator;
+  }
+
+  // Fall back to generating from target
+  return generateLocator(step.target);
 }
 
 /**
@@ -119,38 +138,135 @@ function generateAssertion(assertion: Assertion, indent: number): string[] {
   const lines: string[] = [];
   const indentStr = ' '.repeat(indent);
 
+  // Add description comment if available
+  if (assertion.description) {
+    lines.push(`${indentStr}// ${assertion.description}`);
+  }
+
   switch (assertion.type) {
-    case 'url':
+    case 'url': {
       // Use string-based RegExp to avoid issues with trailing slashes in regex literals
       const urlPattern = escapeRegexForLiteral(assertion.expected);
       lines.push(`${indentStr}await expect(page).toHaveURL(new RegExp('${urlPattern}'));`);
       break;
+    }
 
     case 'title':
       lines.push(`${indentStr}await expect(page).toHaveTitle(/${escapeRegex(assertion.expected)}/);`);
       break;
 
-    case 'visible':
-      const visibleLocator = assertion.locator || generateLocator(assertion.target);
+    case 'visible': {
+      const visibleLocator = generateAssertionLocator(assertion);
       lines.push(`${indentStr}await expect(${visibleLocator}).toBeVisible();`);
       break;
+    }
 
-    case 'value':
-      const valueLocator = assertion.locator || generateLocator(assertion.target);
-      lines.push(`${indentStr}await expect(${valueLocator}).toHaveValue('${assertion.expected}');`);
+    case 'hidden': {
+      const hiddenLocator = generateAssertionLocator(assertion);
+      lines.push(`${indentStr}await expect(${hiddenLocator}).toBeHidden();`);
       break;
+    }
 
-    case 'text':
-      const textLocator = assertion.locator || generateLocator(assertion.target);
-      lines.push(`${indentStr}await expect(${textLocator}).toContainText('${assertion.expected}');`);
+    case 'enabled': {
+      const enabledLocator = generateAssertionLocator(assertion);
+      lines.push(`${indentStr}await expect(${enabledLocator}).toBeEnabled();`);
       break;
+    }
+
+    case 'disabled': {
+      const disabledLocator = generateAssertionLocator(assertion);
+      lines.push(`${indentStr}await expect(${disabledLocator}).toBeDisabled();`);
+      break;
+    }
+
+    case 'value': {
+      const valueLocator = generateAssertionLocator(assertion);
+      lines.push(`${indentStr}await expect(${valueLocator}).toHaveValue('${escapeStringLiteral(assertion.expected)}');`);
+      break;
+    }
+
+    case 'text': {
+      const textLocator = generateAssertionLocator(assertion);
+      lines.push(`${indentStr}await expect(${textLocator}).toContainText('${escapeStringLiteral(assertion.expected)}');`);
+      break;
+    }
   }
 
   return lines;
 }
 
 /**
- * Generates a Playwright locator string for an element.
+ * Generates a locator string for an assertion.
+ * Uses structured locator info when available, falls back to legacy locator or target.
+ */
+function generateAssertionLocator(assertion: Assertion): string {
+  // Use structured locator type if available
+  if (assertion.locatorType && assertion.locatorValue) {
+    return generateStructuredLocator(assertion.locatorType, assertion.locatorValue);
+  }
+
+  // Fall back to legacy locator string
+  if (assertion.locator) {
+    return assertion.locator;
+  }
+
+  // Fall back to generating from target
+  return generateLocator(assertion.target);
+}
+
+/**
+ * Generates a Playwright locator string using the structured locator type.
+ * Uses Playwright best practices: role > label > placeholder > text > testid > name > css
+ *
+ * @param locatorType - Type of locator strategy
+ * @param locatorValue - Value for the locator
+ * @param options - Optional additional options (e.g., { name: 'Submit' } for role)
+ * @returns Playwright locator code string
+ */
+function generateStructuredLocator(
+  locatorType: LocatorType,
+  locatorValue: string,
+  options?: Record<string, string>
+): string {
+  const escapedValue = escapeStringLiteral(locatorValue);
+
+  switch (locatorType) {
+    case 'role': {
+      if (options && Object.keys(options).length > 0) {
+        const optionsStr = Object.entries(options)
+          .map(([k, v]) => `${k}: '${escapeStringLiteral(v)}'`)
+          .join(', ');
+        return `page.getByRole('${escapedValue}', { ${optionsStr} })`;
+      }
+      return `page.getByRole('${escapedValue}')`;
+    }
+
+    case 'label':
+      return `page.getByLabel('${escapedValue}')`;
+
+    case 'placeholder':
+      return `page.getByPlaceholder('${escapedValue}')`;
+
+    case 'text':
+      return `page.getByText('${escapedValue}')`;
+
+    case 'testid':
+      return `page.getByTestId('${escapedValue}')`;
+
+    case 'name':
+      return `page.locator('[name="${escapedValue}"]')`;
+
+    case 'css':
+      return `page.locator('${escapedValue}')`;
+
+    default:
+      // Fallback to getByLabel for unknown types
+      return `page.getByLabel('${escapedValue}')`;
+  }
+}
+
+/**
+ * Generates a Playwright locator string for an element (legacy).
  *
  * @param target - Target element identifier (ID, name, placeholder, text, etc.)
  * @returns Playwright locator code string
@@ -158,16 +274,27 @@ function generateAssertion(assertion: Assertion, indent: number): string[] {
 function generateLocator(target: string): string {
   // Try to determine locator type from target
   if (target.startsWith('#')) {
-    return `page.locator('${target}')`;
+    return `page.locator('${escapeStringLiteral(target)}')`;
   }
 
   if (target.startsWith('[') && target.includes('name=')) {
-    return `page.locator('${target}')`;
+    return `page.locator('${escapeStringLiteral(target)}')`;
   }
 
-  // Default to getByRole or getByLabel based on context
-  // For now, use getByLabel as a safe default
-  return `page.getByLabel('${target}')`;
+  // Default to getByLabel as a safe default for form fields
+  return `page.getByLabel('${escapeStringLiteral(target)}')`;
+}
+
+/**
+ * Escapes single quotes and backslashes for use in string literals.
+ *
+ * @param str - String to escape
+ * @returns Escaped string safe for string literals
+ */
+function escapeStringLiteral(str: string): string {
+  return str
+    .replace(/\\/g, '\\\\')  // Escape backslashes first
+    .replace(/'/g, "\\'");    // Escape single quotes
 }
 
 /**

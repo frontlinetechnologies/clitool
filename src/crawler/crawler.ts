@@ -63,7 +63,7 @@ export class Crawler {
     const queue: string[] = [normalizeURL(this.baseURL)];
 
     // Set up interrupt handler
-    const interruptHandler = () => {
+    const interruptHandler = (): void => {
       // Interrupt flag is set by signal handler
     };
     onInterrupt(interruptHandler);

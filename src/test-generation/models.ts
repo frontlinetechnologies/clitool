@@ -39,24 +39,41 @@ export interface TestCase {
 }
 
 /**
+ * Locator strategy types for Playwright element selection.
+ * Listed in priority order per best practices.
+ */
+export type LocatorType = 'role' | 'label' | 'placeholder' | 'text' | 'testid' | 'name' | 'css';
+
+/**
  * Represents a single action step in a test case (e.g., navigate, fill form, click button).
  */
 export interface TestStep {
   action: 'goto' | 'fill' | 'click' | 'wait' | 'select';
   target: string; // Target element or URL
   value?: string; // Value for actions like "fill" or "select"
-  locator?: string; // Playwright locator string
+  locator?: string; // Playwright locator string (legacy)
+  locatorType?: LocatorType; // Locator strategy type (new structured format)
+  locatorValue?: string; // Locator value (new structured format)
+  locatorOptions?: Record<string, string>; // Additional locator options (e.g., { name: 'Submit' } for role)
   order: number; // Step order in sequence
 }
+
+/**
+ * Assertion types supported by Playwright.
+ */
+export type AssertionType = 'url' | 'title' | 'visible' | 'hidden' | 'value' | 'text' | 'enabled' | 'disabled';
 
 /**
  * Represents a verification assertion in a test case.
  */
 export interface Assertion {
-  type: 'url' | 'title' | 'visible' | 'value' | 'text';
+  type: AssertionType;
   target: string; // Target element or page
   expected: string; // Expected value
-  locator?: string; // Playwright locator for element assertions
+  locator?: string; // Playwright locator for element assertions (legacy)
+  locatorType?: LocatorType; // Locator strategy type (new structured format)
+  locatorValue?: string; // Locator value (new structured format)
+  description?: string; // Human-readable description of what this asserts
 }
 
 /**

@@ -368,9 +368,9 @@ describe('Flow Test Generation Integration', () => {
 
       result.testFiles.forEach((file) => {
         // Test cases should be indented with 2 spaces
-        expect(file.code).toMatch(/^  test\('/m);
+        expect(file.code).toMatch(/^ {2}test\('/m);
         // Statements inside tests should be indented with 4 spaces
-        expect(file.code).toMatch(/^    await /m);
+        expect(file.code).toMatch(/^ {4}await /m);
       });
     });
   });

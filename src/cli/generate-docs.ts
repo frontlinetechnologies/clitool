@@ -23,6 +23,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as readline from 'readline';
 
+interface GenerateDocsOptions {
+  output?: string;
+  anthropicApiKey?: string;
+  verbose?: boolean;
+}
+
 const program = new Command();
 
 program
@@ -55,7 +61,7 @@ Input Format:
     "inputFields": [ ... ]
   }
   `)
-  .action(async (options) => {
+  .action(async (options: GenerateDocsOptions) => {
     try {
       // Resolve API key from all sources (CLI > env > project config > global config)
       let apiKey: string | null = null;

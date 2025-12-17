@@ -101,7 +101,7 @@ describe('Config File Integration Tests', () => {
       expect(fs.existsSync(configPath)).toBe(true);
 
       // Verify content
-      const content = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+      const content = JSON.parse(fs.readFileSync(configPath, 'utf-8')) as { anthropicApiKey?: string };
       expect(content.anthropicApiKey).toBe('sk-ant-test-key');
 
       // Verify permissions (owner read/write only)
@@ -131,7 +131,7 @@ describe('Config File Integration Tests', () => {
 
       writeConfigFile(configPath, 'sk-ant-new-key');
 
-      const content = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+      const content = JSON.parse(fs.readFileSync(configPath, 'utf-8')) as { otherField?: string; anthropicApiKey?: string };
       expect(content.otherField).toBe('preserved');
       expect(content.anthropicApiKey).toBe('sk-ant-new-key');
     });
