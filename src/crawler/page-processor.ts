@@ -3,7 +3,7 @@
  * Uses Playwright to handle JavaScript-rendered content and extract links.
  */
 
-import { chromium, Browser } from 'playwright';
+import { chromium, Browser, BrowserContext } from 'playwright';
 import * as cheerio from 'cheerio';
 import { Page, createPage, markPageProcessed, addLinksToPage, setPageError } from '../models/page';
 import { isSameDomain } from '../utils/domain';
@@ -19,9 +19,25 @@ export interface ProcessPageResult {
 
 export class PageProcessor {
   private browser: Browser | null = null;
+  private externalContext: BrowserContext | null = null;
 
   constructor(_baseURL: string) {
     // Base URL stored for potential future use
+  }
+
+  /**
+   * Sets an external browser context (e.g., authenticated context).
+   * When set, processPage will use this context instead of creating new pages.
+   */
+  setContext(context: BrowserContext): void {
+    this.externalContext = context;
+  }
+
+  /**
+   * Clears the external context.
+   */
+  clearContext(): void {
+    this.externalContext = null;
   }
 
   /**
@@ -37,7 +53,7 @@ export class PageProcessor {
    * Processes a single page: loads it, extracts content, and discovers links.
    */
   async processPage(url: string): Promise<ProcessPageResult> {
-    if (!this.browser) {
+    if (!this.browser && !this.externalContext) {
       await this.initialize();
     }
 
@@ -45,7 +61,10 @@ export class PageProcessor {
     const links: string[] = [];
 
     try {
-      const playwrightPage = await this.browser!.newPage();
+      // Use external context if available, otherwise create from browser
+      const playwrightPage = this.externalContext
+        ? await this.externalContext.newPage()
+        : await this.browser!.newPage();
       
       // Retry logic for 429 and 5xx responses with exponential backoff
       const retryableStatusCodes = [429, 500, 502, 503, 504];

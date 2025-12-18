@@ -54,6 +54,12 @@ tests/generated-*/
 
 # Testarion config files (may contain API keys)
 .testarion/
+testarion.auth.json
+*.auth.json
+
+# Auth state files
+auth-states/
+*-state.json
 
 _docs/
 .cursor/

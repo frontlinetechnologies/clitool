@@ -18,7 +18,9 @@ import {
   getGlobalConfigPath,
   setPromptShownState,
   ConfigError,
+  loadAuthConfig,
 } from '../utils/config-loader';
+import { createAuthFixturesGenerator } from '../test-generation/auth-fixtures';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as readline from 'readline';
@@ -27,6 +29,8 @@ interface GenerateTestsOptions {
   outputDir?: string;
   anthropicApiKey?: string;
   verbose?: boolean;
+  authFixtures?: boolean;
+  authConfig?: string;
 }
 
 const program = new Command();
@@ -37,6 +41,8 @@ program
   .option('--output-dir <directory>', 'Output directory for test files', './tests/generated/')
   .option('--anthropic-api-key <key>', 'Anthropic API key for AI-enhanced test scenarios (overrides ANTHROPIC_API_KEY environment variable and config files)')
   .option('--verbose', 'Show detailed information including API key configuration guidance')
+  .option('--auth-fixtures', 'Generate authentication fixtures file for role-based tests')
+  .option('--auth-config <path>', 'Path to authentication config file (for auth fixtures generation)')
   .addHelpText('after', `
 Examples:
   $ testarion crawl https://example.com | testarion generate-tests
@@ -124,7 +130,7 @@ Input Format:
       // Write test files
       for (const testFile of testSuite.testFiles) {
         const filePath = path.join(outputDir, testFile.filename);
-        
+
         // Generate code if not already generated
         if (!testFile.code) {
           const { generatePlaywrightCode } = await import('../test-generation/playwright-codegen');
@@ -142,8 +148,49 @@ Input Format:
         }
       }
 
+      // Generate auth fixtures if requested
+      let authFilesGenerated = 0;
+      if (options.authFixtures) {
+        const authConfig = loadAuthConfig(options.authConfig);
+        if (authConfig) {
+          const authGenerator = createAuthFixturesGenerator(authConfig);
+
+          // Write auth fixtures file
+          const fixturesPath = path.join(outputDir, 'auth.fixtures.ts');
+          const fixturesCode = authGenerator.generateFixturesCode();
+          try {
+            fs.writeFileSync(fixturesPath, fixturesCode, 'utf-8');
+            authFilesGenerated++;
+          } catch (error) {
+            throw createTestGenerationError(
+              TestGenerationErrorType.FILE_WRITE_ERROR,
+              `Failed to write auth fixtures file ${fixturesPath}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+              error instanceof Error ? error : undefined,
+            );
+          }
+
+          // Write .env template if roles exist
+          if (authConfig.roles.length > 0) {
+            const envTemplatePath = path.join(outputDir, '.env.example');
+            const envTemplate = authGenerator.generateEnvTemplate();
+            try {
+              fs.writeFileSync(envTemplatePath, envTemplate, 'utf-8');
+              authFilesGenerated++;
+            } catch (error) {
+              // .env template is optional - just warn
+              console.error(`Warning: Could not write .env template: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            }
+          }
+
+          console.error(`Generated auth fixtures: auth.fixtures.ts${authConfig.roles.length > 0 ? ', .env.example' : ''}`);
+        } else {
+          console.error('Warning: --auth-fixtures specified but no auth config found. Use --auth-config to specify config file.');
+        }
+      }
+
       // Display summary
-      console.error(`Generated ${testSuite.summary.totalTestFiles} test file(s) with ${testSuite.summary.totalTestCases} test case(s)`);
+      const totalFiles = testSuite.summary.totalTestFiles + authFilesGenerated;
+      console.error(`Generated ${totalFiles} file(s): ${testSuite.summary.totalTestFiles} test file(s) with ${testSuite.summary.totalTestCases} test case(s)${authFilesGenerated > 0 ? `, ${authFilesGenerated} auth file(s)` : ''}`);
       console.error(`Output directory: ${outputDir}`);
 
       process.exit(0);

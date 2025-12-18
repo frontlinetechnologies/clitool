@@ -1,7 +1,9 @@
 /**
  * Configuration types for advanced crawl controls.
- * Defines limits, filters, and depth tracking for the crawler.
+ * Defines limits, filters, depth tracking, and authentication settings for the crawler.
  */
+
+import type { AuthConfig } from '../auth/types';
 
 /**
  * Configuration options for crawl behavior.
@@ -15,6 +17,14 @@ export interface CrawlConfig {
   includePatterns?: string[];
   /** URL patterns to exclude (glob or regex patterns) */
   excludePatterns?: string[];
+
+  // Authentication options
+  /** Authentication configuration for authenticated crawling */
+  auth?: AuthConfig;
+  /** Path to pre-existing Playwright storage state file */
+  storageStatePath?: string;
+  /** Skip unauthenticated baseline crawl (only crawl with configured roles) */
+  skipUnauthenticated?: boolean;
 }
 
 /**
@@ -45,6 +55,9 @@ export function createDefaultCrawlConfig(): CrawlConfig {
     maxDepth: undefined,
     includePatterns: undefined,
     excludePatterns: undefined,
+    auth: undefined,
+    storageStatePath: undefined,
+    skipUnauthenticated: false,
   };
 }
 

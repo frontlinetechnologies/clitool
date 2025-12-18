@@ -17,6 +17,7 @@ AI-powered CLI tool for crawling web applications and generating E2E tests. Buil
 - [Installation](#installation)
 - [Usage](#usage)
   - [Crawl](#crawl)
+  - [Authenticated Crawling](#authenticated-crawling)
   - [Generate Documentation](#generate-documentation)
   - [Generate Tests](#generate-tests)
 - [API Key Configuration](#api-key-configuration)
@@ -77,6 +78,81 @@ testarion crawl https://example.com --format text
 testarion crawl https://example.com --verbose --rate-limit 2.5
 ```
 
+### Authenticated Crawling
+
+Crawl pages that require authentication using email/password login or pre-existing session state.
+
+**Authentication Options:**
+
+- `--auth-role <name>`: Role name for credentials (requires env vars: `{ROLE}_EMAIL`, `{ROLE}_PASSWORD`)
+- `--login-url <url>`: Login page URL for form-based authentication
+- `--username-selector <selector>`: CSS selector for username/email field (optional, auto-detected)
+- `--password-selector <selector>`: CSS selector for password field (optional, auto-detected)
+- `--submit-selector <selector>`: CSS selector for submit button (optional, auto-detected)
+- `--auth-success-url <pattern>`: URL pattern indicating successful login
+- `--auth-success-selector <selector>`: CSS selector indicating successful login
+- `--storage-state <path>`: Use pre-existing Playwright storage state file
+- `--auth-config <path>`: Path to authentication config file (JSON)
+
+**Examples:**
+
+```bash
+# Crawl with email/password authentication
+export ADMIN_EMAIL=admin@example.com
+export ADMIN_PASSWORD=secretpassword
+testarion crawl https://example.com --auth-role admin --login-url https://example.com/login
+
+# Crawl with custom selectors
+testarion crawl https://example.com \
+  --auth-role admin \
+  --login-url https://example.com/login \
+  --username-selector "#email" \
+  --password-selector "#password" \
+  --submit-selector "button[type=submit]"
+
+# Crawl using pre-existing session state
+testarion crawl https://example.com --storage-state ./auth-state.json
+
+# Crawl with auth config file
+testarion crawl https://example.com --auth-config ./testarion.auth.json
+```
+
+**Authentication Config File Format:**
+
+Create a `testarion.auth.json` file:
+
+```json
+{
+  "roles": [
+    {
+      "name": "admin",
+      "credentials": {
+        "identifierEnvVar": "ADMIN_EMAIL",
+        "passwordEnvVar": "ADMIN_PASSWORD"
+      },
+      "authMethod": { "type": "form-login" }
+    }
+  ],
+  "login": {
+    "url": "https://example.com/login",
+    "selectors": {
+      "identifier": "#email",
+      "password": "#password",
+      "submit": "button[type=submit]"
+    },
+    "successIndicators": [
+      { "type": "url-pattern", "pattern": "/dashboard" }
+    ]
+  }
+}
+```
+
+**Security Notes:**
+
+- Credentials are always loaded from environment variables, never hardcoded
+- Add `testarion.auth.json` and `*.auth-state.json` to `.gitignore`
+- Storage state files contain session cookies - treat as sensitive
+
 ### Generate Documentation
 
 ```bash
@@ -123,6 +199,9 @@ testarion crawl https://example.com | testarion generate-tests
 
 # With AI enhancement (using command-line parameter)
 testarion crawl https://example.com | testarion generate-tests --anthropic-api-key your-api-key
+
+# Generate with authentication fixtures
+testarion crawl https://example.com | testarion generate-tests --auth-fixtures --auth-config ./testarion.auth.json
 ```
 
 **Options:**
@@ -130,6 +209,8 @@ testarion crawl https://example.com | testarion generate-tests --anthropic-api-k
 - `--output-dir <directory>`: Output directory for test files (default: `./tests/generated/`)
 - `--anthropic-api-key <key>`: Anthropic API key for AI-enhanced test scenarios
 - `--verbose`: Show detailed information including API key configuration guidance
+- `--auth-fixtures`: Generate authentication fixtures file for role-based tests
+- `--auth-config <path>`: Path to authentication config file (for auth fixtures generation)
 
 The `generate-tests` command reads crawl results JSON from stdin and generates Playwright end-to-end test scripts including:
 - Test files organized by user flow (one file per flow)
@@ -139,6 +220,36 @@ The `generate-tests` command reads crawl results JSON from stdin and generates P
 - Checkout flow tests (when payment fields detected)
 - Specific scenario tests (e.g., coupon codes when detected)
 - AI-enhanced test scenarios and assertions (when API key is available)
+- Authentication fixtures for role-based testing (with `--auth-fixtures`)
+
+**Auth Fixtures:**
+
+When using `--auth-fixtures`, the generator creates:
+- `auth.fixtures.ts`: Playwright fixtures with authenticated browser contexts per role
+- `.env.example`: Template for required environment variables
+
+The generated fixtures use environment variables for credentials - never hardcoded values:
+
+```typescript
+// auth.fixtures.ts (generated)
+import { test as base, BrowserContext } from '@playwright/test';
+
+export const test = base.extend<{ adminContext: BrowserContext }>({
+  adminContext: async ({ browser }, use) => {
+    const identifier = process.env.ADMIN_EMAIL;
+    const password = process.env.ADMIN_PASSWORD;
+
+    if (!identifier || !password) {
+      throw new Error('Missing credentials. Set ADMIN_EMAIL and ADMIN_PASSWORD.');
+    }
+
+    const context = await browser.newContext();
+    // ... performs login ...
+    await use(context);
+    await context.close();
+  },
+});
+```
 
 **Example Generated Test File:**
 

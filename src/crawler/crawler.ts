@@ -3,6 +3,7 @@
  * Manages crawl queue, page discovery loop, and result aggregation.
  */
 
+import type { BrowserContext } from 'playwright';
 import { PageProcessor, ProcessPageResult } from './page-processor';
 import { normalizeURL } from './url-normalizer';
 import { Page } from '../models/page';
@@ -26,6 +27,7 @@ import { RobotsChecker, createRobotsChecker } from '../parsers/robots-parser';
 import { RateLimiter, createRateLimiter } from '../utils/rate-limiter';
 import { CrawlConfig, QueueItem, mergeCrawlConfig } from './crawl-config';
 import { URLFilter, createURLFilter, createPermissiveFilter } from '../utils/url-filter';
+import type { AuthEvent } from '../auth/types';
 
 export interface CrawlResults {
   summary: CrawlSummary;
@@ -33,6 +35,10 @@ export interface CrawlResults {
   forms: Form[];
   buttons: Button[];
   inputFields: InputField[];
+  /** Authentication events that occurred during crawl (if authenticated) */
+  authEvents?: AuthEvent[];
+  /** Role name if this was an authenticated crawl */
+  roleName?: string;
 }
 
 export class Crawler {
@@ -49,6 +55,9 @@ export class Crawler {
   private redirectChains: Map<string, string[]> = new Map();
   private baseURL: string;
   private config: CrawlConfig;
+  private authContext: BrowserContext | null = null;
+  private authEvents: AuthEvent[] = [];
+  private roleName?: string;
 
   constructor(
     baseURL: string,
@@ -64,6 +73,43 @@ export class Crawler {
     this.urlFilter = this.config.includePatterns || this.config.excludePatterns
       ? createURLFilter(this.config.includePatterns, this.config.excludePatterns)
       : createPermissiveFilter();
+  }
+
+  /**
+   * Sets an authenticated browser context for the crawler.
+   * When set, the crawler will use this context for all page requests.
+   * @param context - Authenticated browser context
+   * @param roleName - Name of the role for logging
+   */
+  setAuthContext(context: BrowserContext, roleName?: string): void {
+    this.authContext = context;
+    this.roleName = roleName;
+    // Pass the context to the page processor
+    this.processor.setContext(context);
+  }
+
+  /**
+   * Clears the authenticated context.
+   */
+  clearAuthContext(): void {
+    this.authContext = null;
+    this.roleName = undefined;
+    this.processor.clearContext();
+  }
+
+  /**
+   * Adds authentication events to the crawl results.
+   * @param events - Array of auth events to add
+   */
+  addAuthEvents(events: AuthEvent[]): void {
+    this.authEvents.push(...events);
+  }
+
+  /**
+   * Gets whether this crawler has an authenticated context.
+   */
+  isAuthenticated(): boolean {
+    return this.authContext !== null;
   }
 
   /**
@@ -299,13 +345,25 @@ export class Crawler {
     // Sync totalPages with actual pages array length (in case increments were missed)
     summary.totalPages = this.pages.length;
 
-    return {
+    const result: CrawlResults = {
       summary,
       pages: this.pages,
       forms: this.forms,
       buttons: this.buttons,
       inputFields: this.inputFields,
     };
+
+    // Include auth events if any were recorded
+    if (this.authEvents.length > 0) {
+      result.authEvents = this.authEvents;
+    }
+
+    // Include role name if authenticated crawl
+    if (this.roleName) {
+      result.roleName = this.roleName;
+    }
+
+    return result;
   }
 }
 

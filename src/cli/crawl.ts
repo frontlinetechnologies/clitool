@@ -24,6 +24,18 @@ interface CrawlOptions {
   maxDepth?: string;
   include?: string[];
   exclude?: string[];
+  // Authentication options
+  authConfig?: string;
+  authRole?: string;
+  loginUrl?: string;
+  usernameSelector?: string;
+  passwordSelector?: string;
+  submitSelector?: string;
+  authSuccessUrl?: string;
+  authSuccessSelector?: string;
+  authSuccessCookie?: string;
+  storageState?: string;
+  skipUnauthenticated?: boolean;
 }
 
 const program = new Command();
@@ -41,6 +53,18 @@ program
   .option('--max-depth <n>', 'Maximum link depth from start URL (0 = start page only)')
   .option('--include <pattern...>', 'Only crawl URLs matching these patterns (glob or /regex/)')
   .option('--exclude <pattern...>', 'Skip URLs matching these patterns (glob or /regex/)')
+  // Authentication options
+  .option('--auth-config <path>', 'Path to authentication config file (JSON)')
+  .option('--auth-role <name>', 'Single role to crawl as (requires credentials in env)')
+  .option('--login-url <url>', 'Login page URL for form-based auth')
+  .option('--username-selector <selector>', 'CSS selector for username/email field')
+  .option('--password-selector <selector>', 'CSS selector for password field')
+  .option('--submit-selector <selector>', 'CSS selector for submit button')
+  .option('--auth-success-url <pattern>', 'URL pattern indicating successful login')
+  .option('--auth-success-selector <selector>', 'CSS selector indicating successful login')
+  .option('--auth-success-cookie <name>', 'Cookie name indicating successful login')
+  .option('--storage-state <path>', 'Playwright storage state file for session injection')
+  .option('--skip-unauthenticated', 'Skip unauthenticated baseline crawl')
   .addHelpText('after', `
 Examples:
   $ testarion crawl https://example.com
@@ -50,6 +74,11 @@ Examples:
   $ testarion crawl https://example.com --max-pages 50 --max-depth 3
   $ testarion crawl https://example.com --include "**/products/**" --exclude "**/admin/**"
   $ testarion crawl https://example.com --include "/\\/api\\//" --max-pages 100
+
+Authentication examples:
+  $ testarion crawl https://example.com --auth-role admin --login-url https://example.com/login
+  $ testarion crawl https://example.com --auth-config ./testarion.auth.json
+  $ testarion crawl https://example.com --storage-state ./auth-state.json
 
 The crawler will:
   - Discover all accessible pages starting from the provided URL

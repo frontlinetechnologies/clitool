@@ -1,11 +1,13 @@
 /**
- * Configuration file loader for API key resolution.
- * Handles reading/writing config files and resolving API keys from multiple sources.
+ * Configuration file loader for API key and auth config resolution.
+ * Handles reading/writing config files and resolving values from multiple sources.
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import type { AuthConfig } from '../auth/types';
+import { loadAuthConfig as loadAuthConfigFromFile } from '../auth/config';
 
 /**
  * Configuration file structure.
@@ -294,4 +296,50 @@ export function shouldPromptToSave(cliKey?: string, envKey?: string): boolean {
   }
 
   return true;
+}
+
+/**
+ * Default auth config file names to search for.
+ */
+const AUTH_CONFIG_NAMES = ['testarion.auth.json', '.testarion/auth.json', 'auth.config.json'];
+
+/**
+ * Gets the path to auth config file if it exists in project directory.
+ * Searches for common auth config file names.
+ *
+ * @returns Path to auth config file or null if not found
+ */
+export function findAuthConfigPath(): string | null {
+  const cwd = process.cwd();
+
+  for (const name of AUTH_CONFIG_NAMES) {
+    const configPath = path.join(cwd, name);
+    if (fs.existsSync(configPath)) {
+      return configPath;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Loads auth configuration from file.
+ * Searches for auth config in standard locations if path not provided.
+ *
+ * @param configPath - Optional explicit path to auth config file
+ * @returns Loaded AuthConfig or null if not found
+ */
+export function loadAuthConfig(configPath?: string): AuthConfig | null {
+  // If explicit path provided, use it
+  if (configPath) {
+    return loadAuthConfigFromFile(configPath);
+  }
+
+  // Search for config file
+  const foundPath = findAuthConfigPath();
+  if (foundPath) {
+    return loadAuthConfigFromFile(foundPath);
+  }
+
+  return null;
 }
