@@ -11,6 +11,11 @@ import { validateURL } from '../utils/url-validator';
 import { setupSignalHandlers } from '../utils/signals';
 import { formatAsJSON } from '../output/json-formatter';
 import { formatAsText } from '../output/text-formatter';
+import {
+  createAuthenticator,
+  createAuthConfigFromCLI,
+  loadAuthConfig,
+} from '../auth';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -133,6 +138,53 @@ Press Ctrl+C to interrupt the crawl gracefully. Partial results will be saved.
         includePatterns: options.include,
         excludePatterns: options.exclude,
       });
+
+      // Handle authentication if auth options are provided
+      if (options.authConfig || options.authRole || options.storageState) {
+        const { chromium } = await import('playwright');
+        const browser = await chromium.launch();
+
+        try {
+          let authConfig;
+          let roleName = options.authRole || 'authenticated';
+
+          if (options.authConfig) {
+            // Load auth config from file
+            authConfig = await loadAuthConfig(options.authConfig);
+          } else if (options.authRole) {
+            // Create auth config from CLI options
+            authConfig = createAuthConfigFromCLI({
+              authRole: options.authRole,
+              loginUrl: options.loginUrl,
+              usernameSelector: options.usernameSelector,
+              passwordSelector: options.passwordSelector,
+              submitSelector: options.submitSelector,
+              authSuccessUrl: options.authSuccessUrl,
+              authSuccessSelector: options.authSuccessSelector,
+              authSuccessCookie: options.authSuccessCookie,
+            });
+          }
+
+          if (authConfig) {
+            const authenticator = createAuthenticator(authConfig, browser);
+
+            try {
+              const context = await authenticator.authenticate(roleName);
+              crawler.setAuthContext(context, roleName);
+              if (!options.quiet) {
+                console.error(`Authenticated as: ${roleName}`);
+              }
+            } catch (authError) {
+              console.error('Authentication error:', authError instanceof Error ? authError.message : authError);
+              if (!options.quiet) {
+                console.error('Continuing with unauthenticated crawl...');
+              }
+            }
+          }
+        } catch (setupError) {
+          console.error('Auth setup error:', setupError instanceof Error ? setupError.message : setupError);
+        }
+      }
 
       // Perform crawl
       const results = await crawler.crawl();
