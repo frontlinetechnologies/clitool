@@ -15,11 +15,13 @@ AI-powered CLI tool for crawling web applications and generating E2E tests. Buil
 
 - [Quick Start](#quick-start)
 - [Installation](#installation)
+- [Requirements](#requirements)
 - [Usage](#usage)
   - [Crawl](#crawl)
   - [Authenticated Crawling](#authenticated-crawling)
   - [Generate Documentation](#generate-documentation)
   - [Generate Tests](#generate-tests)
+  - [Reset Prompts](#reset-prompts)
 - [API Key Configuration](#api-key-configuration)
 - [Development](#development)
 - [Troubleshooting](#troubleshooting)
@@ -46,6 +48,11 @@ npm install
 npm run build
 ```
 
+## Requirements
+
+- Node.js >= 18.0.0
+- TypeScript 5.x
+
 ## Usage
 
 ### Crawl
@@ -61,6 +68,10 @@ testarion crawl https://example.com
 - `--verbose`: Include detailed information
 - `--rate-limit <seconds>`: Delay between requests in seconds (default: 1.5)
 - `--output <file>`: Save results to file
+- `--max-pages <n>`: Maximum number of pages to crawl
+- `--max-depth <n>`: Maximum link depth from start URL
+- `--include <pattern...>`: Only crawl URLs matching pattern (glob or /regex/)
+- `--exclude <pattern...>`: Skip URLs matching pattern (glob or /regex/)
 
 **Examples:**
 
@@ -76,6 +87,12 @@ testarion crawl https://example.com --format text
 
 # Verbose mode with custom rate limit
 testarion crawl https://example.com --verbose --rate-limit 2.5
+
+# Crawl only product pages, exclude admin
+testarion crawl https://example.com --include "**/products/**" --exclude "**/admin/**"
+
+# Limit crawl scope
+testarion crawl https://example.com --max-pages 50 --max-depth 3
 ```
 
 ### Authenticated Crawling
@@ -91,8 +108,10 @@ Crawl pages that require authentication using email/password login or pre-existi
 - `--submit-selector <selector>`: CSS selector for submit button (optional, auto-detected)
 - `--auth-success-url <pattern>`: URL pattern indicating successful login
 - `--auth-success-selector <selector>`: CSS selector indicating successful login
+- `--auth-success-cookie <name>`: Cookie name indicating successful login
 - `--storage-state <path>`: Use pre-existing Playwright storage state file
 - `--auth-config <path>`: Path to authentication config file (JSON)
+- `--skip-unauthenticated`: Skip unauthenticated baseline crawl (only crawl as authenticated role)
 
 **Examples:**
 
@@ -285,6 +304,38 @@ npx playwright test tests/generated/
 npx playwright test tests/generated/login-flow.spec.ts
 ```
 
+### Reset Prompts
+
+Manage AI system prompts used for page analysis and test generation.
+
+```bash
+# List all prompts and their status
+testarion reset-prompts --list
+
+# Reset all prompts to defaults
+testarion reset-prompts --force
+
+# Reset a specific prompt
+testarion reset-prompts page-analysis
+```
+
+**Options:**
+
+- `[prompt-name]`: Specific prompt to reset (optional)
+- `--list, -l`: List available prompts and their customization status
+- `--force, -f`: Skip confirmation prompts
+- `--verbose, -v`: Show detailed output including file paths
+
+**Available Prompts:**
+
+| Prompt | Purpose |
+|--------|---------|
+| `page-analysis` | AI page description generation |
+| `test-scenario-generation` | Test scenario creation |
+| `test-data-generation` | Test data synthesis |
+
+Prompts can be customized by editing files in your project's `.testarion/prompts/` directory. Use `reset-prompts` to restore defaults.
+
 ## API Key Configuration
 
 The AI-enhanced features require an Anthropic API key. The tool supports three methods for providing your API key, checked in this priority order:
@@ -396,8 +447,3 @@ Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
 ## License
 
 This project is licensed under the [O'Saasy License](LICENSE) - MIT with SaaS rights reserved.
-
-## Requirements
-
-- Node.js >= 18.0.0
-- TypeScript 5.x
