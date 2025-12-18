@@ -122,18 +122,18 @@ export class CredentialGuard {
    * Wraps a logger to auto-redact all output.
    */
   wrapLogger<T extends Logger>(logger: T): T {
-    const self = this;
+    const redactFn = this.redact.bind(this);
 
     const wrap =
       (fn: (message: string, ...args: unknown[]) => void) =>
       (message: string, ...args: unknown[]): void => {
-        const redactedMessage = self.redact(message);
-        const redactedArgs = args.map((arg) => {
+        const redactedMessage = redactFn(message);
+        const redactedArgs = args.map((arg): unknown => {
           if (typeof arg === 'string') {
-            return self.redact(arg);
+            return redactFn(arg);
           }
           if (typeof arg === 'object' && arg !== null) {
-            return JSON.parse(self.redact(JSON.stringify(arg)));
+            return JSON.parse(redactFn(JSON.stringify(arg))) as unknown;
           }
           return arg;
         });

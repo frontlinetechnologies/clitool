@@ -14,12 +14,10 @@ export interface Page {
   // Auth-related fields (optional, added during authenticated crawls)
   /**
    * Required authentication level to access this page.
-   * 'public' = no auth required
-   * 'authenticated' = any logged-in user
-   * 'unknown' = not yet determined
-   * string = specific role name required
+   * Common values: 'public' (no auth), 'authenticated' (any logged-in user),
+   * 'unknown' (not yet determined), or a specific role name (e.g., 'admin').
    */
-  authLevel?: 'public' | 'authenticated' | 'unknown' | string;
+  authLevel?: string;
 
   /** Roles that can access this page */
   accessibleByRoles?: string[];
@@ -78,7 +76,7 @@ export function setPageError(page: Page, error: string): Page {
  */
 export function setPageAuthLevel(
   page: Page,
-  authLevel: 'public' | 'authenticated' | 'unknown' | string,
+  authLevel: string,
   accessibleByRoles?: string[],
   minPrivilegeLevel?: number,
 ): Page {
@@ -95,7 +93,7 @@ export function setPageAuthLevel(
  */
 export function createAuthenticatedPage(
   page: Page,
-  authLevel: 'public' | 'authenticated' | string = 'unknown',
+  authLevel = 'unknown',
   accessibleByRoles: string[] = [],
   minPrivilegeLevel = 0,
 ): Page {

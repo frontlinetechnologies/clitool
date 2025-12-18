@@ -170,7 +170,7 @@ describe('LoginDetector', () => {
       const page = {
         ...createMockPage(),
         url: jest.fn().mockReturnValue('https://example.com/dashboard'),
-      } as any;
+      };
 
       const isSuccess = await detector.checkSuccess(page, {
         url: 'https://example.com/login',
@@ -206,7 +206,7 @@ describe('LoginDetector', () => {
       const page = {
         ...createMockPage(),
         url: jest.fn().mockReturnValue('https://example.com/login'),
-      } as any;
+      };
 
       const isSuccess = await detector.checkSuccess(page, {
         url: 'https://example.com/login',
@@ -220,7 +220,7 @@ describe('LoginDetector', () => {
       const page = {
         ...createMockPage(),
         url: jest.fn().mockReturnValue('https://example.com/home'),
-      } as any;
+      };
 
       const isSuccess = await detector.checkSuccess(page, {
         url: 'https://example.com/login',

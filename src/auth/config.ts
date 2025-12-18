@@ -92,7 +92,7 @@ export function validateAuthConfig(config: unknown): AuthConfig {
   const roleNames = new Set<string>();
 
   for (let i = 0; i < rawConfig.roles.length; i++) {
-    const role = rawConfig.roles[i];
+    const role = rawConfig.roles[i] as unknown;
     const validatedRole = validateRoleConfig(role, i);
 
     // Check for duplicate role names
@@ -202,7 +202,7 @@ function validateAuthMethod(method: unknown, roleName: string): AuthMethod {
     throw new AuthConfigError(`Role '${roleName}': authMethod.type is required`);
   }
 
-  const type = rawMethod.type as string;
+  const type = rawMethod.type;
 
   if (!VALID_AUTH_METHODS.includes(type as (typeof VALID_AUTH_METHODS)[number])) {
     throw new AuthConfigError(
@@ -214,7 +214,7 @@ function validateAuthMethod(method: unknown, roleName: string): AuthMethod {
     case 'form-login':
       return { type: 'form-login' };
 
-    case 'cookie-injection':
+    case 'cookie-injection': {
       if (!rawMethod.cookies || typeof rawMethod.cookies !== 'object') {
         throw new AuthConfigError(`Role '${roleName}': cookie-injection requires 'cookies' config`);
       }
@@ -236,6 +236,7 @@ function validateAuthMethod(method: unknown, roleName: string): AuthMethod {
       throw new AuthConfigError(
         `Role '${roleName}': cookies.type must be 'env-var' or 'file'`,
       );
+    }
 
     case 'token-injection':
       if (typeof rawMethod.header !== 'string') {
@@ -468,16 +469,20 @@ export function createAuthConfigFromCLI(options: {
 export function hasCredentialsInConfig(configPath: string): boolean {
   try {
     const content = fs.readFileSync(configPath, 'utf-8');
-    const config = JSON.parse(content);
+    const config = JSON.parse(content) as Record<string, unknown>;
 
     // Check if any role has direct credential values (not env var references)
     if (Array.isArray(config.roles)) {
       for (const role of config.roles) {
-        if (role.credentials) {
+        if (role && typeof role === 'object' && 'credentials' in role) {
+          const roleObj = role as Record<string, unknown>;
+          const creds = roleObj.credentials;
           // If credentials contains actual values instead of env var names
-          const creds = role.credentials;
-          if (creds.identifier || creds.password || creds.email || creds.username) {
-            return true;
+          if (creds && typeof creds === 'object') {
+            const credsRecord = creds as Record<string, unknown>;
+            if (credsRecord.identifier || credsRecord.password || credsRecord.email || credsRecord.username) {
+              return true;
+            }
           }
         }
       }

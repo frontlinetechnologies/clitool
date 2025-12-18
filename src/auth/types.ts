@@ -181,11 +181,10 @@ export interface AuthenticatedPage {
 
   /**
    * Required authentication level to access this page.
-   * 'public' = no auth required
-   * 'authenticated' = any logged-in user
-   * string = specific role name required
+   * Common values: 'public' (no auth), 'authenticated' (any logged-in user),
+   * or a specific role name (e.g., 'admin').
    */
-  authLevel: 'public' | 'authenticated' | string;
+  authLevel: string;
 
   /** Roles that can access this page */
   accessibleByRoles: string[];

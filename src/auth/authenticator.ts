@@ -25,6 +25,27 @@ interface ResolvedCredentials {
 }
 
 /**
+ * Storage state format from Playwright.
+ */
+interface StorageState {
+  cookies?: Array<{
+    name: string;
+    value: string;
+    url?: string;
+    domain?: string;
+    path?: string;
+    expires?: number;
+    httpOnly?: boolean;
+    secure?: boolean;
+    sameSite?: 'Strict' | 'Lax' | 'None';
+  }>;
+  origins?: Array<{
+    origin: string;
+    localStorage: Array<{ name: string; value: string }>;
+  }>;
+}
+
+/**
  * Main authentication orchestrator.
  */
 export class Authenticator {
@@ -194,7 +215,7 @@ export class Authenticator {
 
     // Read and apply storage state
     const stateContent = fs.readFileSync(absolutePath, 'utf-8');
-    const state = JSON.parse(stateContent);
+    const state = JSON.parse(stateContent) as StorageState;
 
     // Apply cookies
     if (state.cookies && Array.isArray(state.cookies)) {
@@ -208,10 +229,10 @@ export class Authenticator {
         if (origin.origin && origin.localStorage) {
           await page.goto(origin.origin);
           for (const item of origin.localStorage) {
+            const key = item.name;
+            const value = item.value;
             await page.evaluate(
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              ({ key, value }) => (globalThis as any).localStorage.setItem(key, value),
-              { key: item.name, value: item.value },
+              `localStorage.setItem(${JSON.stringify(key)}, ${JSON.stringify(value)})`,
             );
           }
         }
