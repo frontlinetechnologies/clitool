@@ -15,9 +15,10 @@ import { analyzePage } from '../ai/anthropic-client';
  *
  * @param crawlResults - Parsed crawl results input
  * @param apiKey - Optional API key for AI features. If provided, takes precedence over environment variable.
+ * @param userContext - Optional user-provided context to include in AI prompts
  * @returns Generated documentation object
  */
-export async function generateDocumentation(crawlResults: CrawlResultsInput, apiKey?: string): Promise<Documentation> {
+export async function generateDocumentation(crawlResults: CrawlResultsInput, apiKey?: string, userContext?: string): Promise<Documentation> {
   // Handle empty results
   if (!crawlResults.pages || crawlResults.pages.length === 0) {
     return generateEmptyDocumentation();
@@ -36,7 +37,7 @@ export async function generateDocumentation(crawlResults: CrawlResultsInput, api
   const criticalFlows = detectCriticalFlows(crawlResults.pages, crawlResults.forms || []);
 
   // Generate page details with AI descriptions (Phase 6)
-  const pageDetails = await generatePageDetailsWithAI(crawlResults, apiKey);
+  const pageDetails = await generatePageDetailsWithAI(crawlResults, apiKey, userContext);
 
   // Update summary with navigation paths and flows count
   summary.navigationPathsCount = navigationPaths.length;
@@ -107,11 +108,12 @@ function generateSummary(crawlResults: CrawlResultsInput): DocumentationSummary 
  * Per FR-008: falls back to structural descriptions if API unavailable.
  * Per FR-009: handles API unavailability gracefully.
  * Per FR-018: processes sequentially to respect API rate limits.
- * 
+ *
  * @param crawlResults - Parsed crawl results input
  * @param apiKey - Optional API key for AI features. If provided, takes precedence over environment variable.
+ * @param userContext - Optional user-provided context to include in AI prompts
  */
-async function generatePageDetailsWithAI(crawlResults: CrawlResultsInput, apiKey?: string): Promise<PageDetail[]> {
+async function generatePageDetailsWithAI(crawlResults: CrawlResultsInput, apiKey?: string, userContext?: string): Promise<PageDetail[]> {
   const pageDetails: PageDetail[] = [];
 
   // Process pages sequentially to respect API rate limits (FR-018)
@@ -145,7 +147,7 @@ async function generatePageDetailsWithAI(crawlResults: CrawlResultsInput, apiKey
     // Try to get AI-generated description (FR-007, FR-008, FR-009)
     let description: string | undefined;
     try {
-      const aiDescription = await analyzePage(page.url, page.title, undefined, apiKey);
+      const aiDescription = await analyzePage(page.url, page.title, undefined, apiKey, undefined, userContext);
       if (aiDescription) {
         description = aiDescription;
       } else {

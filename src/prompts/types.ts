@@ -42,6 +42,8 @@ export interface SystemPrompt {
 export interface PromptContext {
   variables: Record<string, string | undefined>;
   verbose?: boolean;
+  /** User-provided context from CLI (--context, --context-text, TESTARION_CONTEXT) */
+  userContext?: string;
 }
 
 /**

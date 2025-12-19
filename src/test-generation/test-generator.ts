@@ -32,12 +32,14 @@ import { UserFlow } from '../documentation/models';
  * @param crawlResults - Parsed crawl results input
  * @param outputDirectory - Directory where test files will be saved
  * @param apiKey - Optional API key for AI features. If provided, takes precedence over environment variable. Reserved for future AI integration.
+ * @param userContext - Optional user-provided context to include in AI prompts
  * @returns Generated test suite
  */
 export async function generateTestSuite(
   crawlResults: CrawlResultsInput,
   outputDirectory: string,
   apiKey?: string,
+  userContext?: string,
 ): Promise<GeneratedTestSuite> {
   // Handle empty results
   if (!crawlResults.pages || crawlResults.pages.length === 0) {
@@ -65,7 +67,7 @@ export async function generateTestSuite(
     // Try to get AI-enhanced test scenarios if API key is available
     let aiTestCases: TestCase[] = [];
     if (apiKey) {
-      const aiSuggestions = await getAITestSuggestions(flow, crawlResults, apiKey);
+      const aiSuggestions = await getAITestSuggestions(flow, crawlResults, apiKey, userContext);
       if (aiSuggestions && aiSuggestions.length > 0) {
         aiTestCases = aiSuggestions.map(convertAISuggestionToTestCase);
         aiEnhanced = true;
@@ -758,17 +760,19 @@ function generateButtonLocator(button: import('../models/button').Button): strin
  * @param flow - The user flow to analyze
  * @param crawlResults - Crawl results input
  * @param apiKey - API key for AI service
+ * @param userContext - Optional user-provided context
  * @returns Promise resolving to AI suggestions or null
  */
 async function getAITestSuggestions(
   flow: UserFlow,
   crawlResults: CrawlResultsInput,
   apiKey: string,
+  userContext?: string,
 ): Promise<AITestScenarioSuggestion[] | null> {
   const flowPageUrls = flow.pages.map((p) => p.url);
   const formFields = getFormFieldsForFlow(flow, crawlResults);
 
-  return analyzeFlowForTests(flow.type, flowPageUrls, formFields, apiKey);
+  return analyzeFlowForTests(flow.type, flowPageUrls, formFields, apiKey, undefined, userContext);
 }
 
 /**

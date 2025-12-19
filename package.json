@@ -1,6 +1,6 @@
 {
   "name": "@testarion/cli",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "AI-powered CLI tool for crawling web applications and generating E2E tests",
   "main": "dist/cli/index.js",
   "bin": {

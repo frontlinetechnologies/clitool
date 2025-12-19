@@ -1,6 +1,6 @@
 ---
 name: test-data-generation
-version: 2.0.0
+version: 2.1.0
 description: Generates realistic, unique test values for form fields that are suitable for automated testing
 max_tokens: 150
 variables:
@@ -13,9 +13,17 @@ variables:
   - name: test_type
     required: false
     description: Type of test - valid (default), invalid, edge_case, or boundary
+  - name: userContext
+    required: false
+    description: User-provided context for additional guidance
 ---
 
 Generate a test value for a {{field_type}} field.
+
+{{#if userContext}}
+### Additional Context:
+{{userContext}}
+{{/if}}
 
 **Context:** {{context}}
 {{#if test_type}}**Test Type:** {{test_type}}{{/if}}

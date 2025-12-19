@@ -1,6 +1,6 @@
 ---
 name: test-scenario-generation
-version: 2.1.0
+version: 2.2.0
 description: Generates high-quality Playwright E2E test scenarios with proper assertions and locators
 max_tokens: 2000
 variables:
@@ -19,9 +19,17 @@ variables:
   - name: available_selectors
     required: false
     description: data-testid and aria-label values found on pages
+  - name: userContext
+    required: false
+    description: User-provided context for additional guidance
 ---
 
 Generate Playwright E2E test scenarios for this web flow.
+
+{{#if userContext}}
+### Additional Context:
+{{userContext}}
+{{/if}}
 
 ## Context
 

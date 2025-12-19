@@ -146,11 +146,11 @@ Press Ctrl+C to interrupt the crawl gracefully. Partial results will be saved.
 
         try {
           let authConfig;
-          let roleName = options.authRole || 'authenticated';
+          const roleName = options.authRole || 'authenticated';
 
           if (options.authConfig) {
             // Load auth config from file
-            authConfig = await loadAuthConfig(options.authConfig);
+            authConfig = loadAuthConfig(options.authConfig);
           } else if (options.authRole) {
             // Create auth config from CLI options
             authConfig = createAuthConfigFromCLI({

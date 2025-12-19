@@ -128,6 +128,7 @@ export function initializeClient(apiKey?: string): Anthropic | null {
  * @param pageContent - HTML content or text content of the page (optional)
  * @param apiKey - Optional API key. If provided, takes precedence over environment variable.
  * @param verbose - Whether to enable verbose logging
+ * @param userContext - Optional user-provided context to include in the prompt
  * @returns Promise resolving to description string or null on failure
  */
 export async function analyzePage(
@@ -136,6 +137,7 @@ export async function analyzePage(
   pageContent?: string,
   apiKey?: string,
   verbose?: boolean,
+  userContext?: string,
 ): Promise<string | null> {
   const apiClient = initializeClient(apiKey);
   if (!apiClient) {
@@ -156,6 +158,7 @@ export async function analyzePage(
             ? pageContent.substring(0, 2000) + '...'
             : pageContent
           : undefined,
+        userContext,
       },
       verbose,
     });
@@ -243,6 +246,7 @@ export interface AITestScenarioSuggestion {
  * @param formFields - Description of form fields
  * @param apiKey - Optional API key. If provided, takes precedence over environment variable.
  * @param verbose - Whether to enable verbose logging
+ * @param userContext - Optional user-provided context to include in the prompt
  * @returns Promise resolving to test scenario suggestions or null on failure
  */
 export async function analyzeFlowForTests(
@@ -251,6 +255,7 @@ export async function analyzeFlowForTests(
   formFields: string[],
   apiKey?: string,
   verbose?: boolean,
+  userContext?: string,
 ): Promise<AITestScenarioSuggestion[] | null> {
   const apiClient = initializeClient(apiKey);
   if (!apiClient) {
@@ -267,6 +272,7 @@ export async function analyzeFlowForTests(
         flow_type: flowType,
         pages: flowPages.join(' -> '),
         form_fields: formFields.join(', '),
+        userContext,
       },
       verbose,
     });
@@ -429,6 +435,7 @@ function parseAssertions(assertions: unknown[] | undefined): AITestAssertion[] |
  * @param context - Additional context about the field (name, placeholder, etc.)
  * @param apiKey - Optional API key. If provided, takes precedence over environment variable.
  * @param verbose - Whether to enable verbose logging
+ * @param userContext - Optional user-provided context to include in the prompt
  * @returns Promise resolving to enhanced test data or null on failure
  */
 export async function generateEnhancedTestData(
@@ -436,6 +443,7 @@ export async function generateEnhancedTestData(
   context: string,
   apiKey?: string,
   verbose?: boolean,
+  userContext?: string,
 ): Promise<string | null> {
   const apiClient = initializeClient(apiKey);
   if (!apiClient) {
@@ -451,6 +459,7 @@ export async function generateEnhancedTestData(
       variables: {
         field_type: fieldType,
         context: context,
+        userContext,
       },
       verbose,
     });

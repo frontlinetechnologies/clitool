@@ -20,6 +20,7 @@ import {
   ConfigError,
   loadAuthConfig,
 } from '../utils/config-loader';
+import { loadContext, isContextError } from '../context';
 import { createAuthFixturesGenerator } from '../test-generation/auth-fixtures';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -31,6 +32,9 @@ interface GenerateTestsOptions {
   verbose?: boolean;
   authFixtures?: boolean;
   authConfig?: string;
+  // Context options
+  context?: string;
+  contextText?: string;
 }
 
 const program = new Command();
@@ -43,6 +47,8 @@ program
   .option('--verbose', 'Show detailed information including API key configuration guidance')
   .option('--auth-fixtures', 'Generate authentication fixtures file for role-based tests')
   .option('--auth-config <path>', 'Path to authentication config file (for auth fixtures generation)')
+  .option('--context <path>', 'Path to a context file (.md or .txt) with additional guidance for AI')
+  .option('--context-text <text>', 'Inline context text to include in AI prompts')
   .addHelpText('after', `
 Examples:
   $ testarion crawl https://example.com | testarion generate-tests
@@ -95,6 +101,23 @@ Input Format:
         await promptToSaveApiKey(apiKey);
       }
 
+      // Load context from file, inline text, and environment variable
+      let userContext: string | undefined;
+      try {
+        const contextResult = loadContext({ context: options.context, contextText: options.contextText });
+        if (contextResult.context) {
+          userContext = contextResult.context.content;
+        }
+        // Display warnings
+        contextResult.warnings.forEach((w) => console.error(w));
+      } catch (error) {
+        if (isContextError(error)) {
+          console.error('Error:', error.toUserMessage());
+          process.exit(1);
+        }
+        throw error;
+      }
+
       // Parse crawl results from stdin
       const crawlResults = await parseCrawlResults();
 
@@ -125,7 +148,7 @@ Input Format:
       }
 
       // Generate test suite
-      const testSuite = await generateTestSuite(crawlResults, outputDir, apiKey || undefined);
+      const testSuite = await generateTestSuite(crawlResults, outputDir, apiKey || undefined, userContext);
 
       // Write test files
       for (const testFile of testSuite.testFiles) {

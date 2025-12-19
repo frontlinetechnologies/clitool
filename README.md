@@ -21,6 +21,7 @@ AI-powered CLI tool for crawling web applications and generating E2E tests. Buil
   - [Authenticated Crawling](#authenticated-crawling)
   - [Generate Documentation](#generate-documentation)
   - [Generate Tests](#generate-tests)
+  - [AI Context](#ai-context)
   - [Reset Prompts](#reset-prompts)
 - [API Key Configuration](#api-key-configuration)
 - [Development](#development)
@@ -195,6 +196,8 @@ testarion crawl https://example.com | testarion generate-docs --anthropic-api-ke
 - `--output <file>`: Save documentation to file instead of stdout
 - `--anthropic-api-key <key>`: Anthropic API key for AI-generated page descriptions
 - `--verbose`: Show detailed information including API key configuration guidance
+- `--context <path>`: Path to a context file with additional guidance for AI
+- `--context-text <text>`: Inline context text to include in AI prompts
 
 The `generate-docs` command reads crawl results JSON from stdin and generates comprehensive Markdown documentation including:
 - Site structure and navigation paths
@@ -230,6 +233,8 @@ testarion crawl https://example.com | testarion generate-tests --auth-fixtures -
 - `--verbose`: Show detailed information including API key configuration guidance
 - `--auth-fixtures`: Generate authentication fixtures file for role-based tests
 - `--auth-config <path>`: Path to authentication config file (for auth fixtures generation)
+- `--context <path>`: Path to a context file with additional guidance for AI
+- `--context-text <text>`: Inline context text to include in AI prompts
 
 The `generate-tests` command reads crawl results JSON from stdin and generates Playwright end-to-end test scripts including:
 - Test files organized by user flow (one file per flow)
@@ -303,6 +308,70 @@ npx playwright test tests/generated/
 # Run specific test file
 npx playwright test tests/generated/login-flow.spec.ts
 ```
+
+### AI Context
+
+Provide additional context to improve AI-generated documentation and test scenarios. Context can be supplied via file, inline text, or environment variable.
+
+**Options (available on `generate-docs` and `generate-tests`):**
+
+- `--context <path>`: Path to a context file (.md or .txt)
+- `--context-text <text>`: Inline context text
+
+**Examples:**
+
+```bash
+# Using a context file
+echo "Focus on checkout flow. Test with logged-in users." > context.md
+testarion crawl https://example.com | testarion generate-tests --context context.md
+
+# Using inline context
+testarion crawl https://example.com | testarion generate-tests --context-text "Focus on mobile viewport"
+
+# Combining file and inline context
+testarion crawl https://example.com | testarion generate-tests \
+  --context context.md \
+  --context-text "Also test dark mode"
+
+# Using environment variable (applies to all commands)
+export TESTARION_CONTEXT="Always test with authenticated user state"
+testarion crawl https://example.com | testarion generate-tests
+```
+
+**Context File Format:**
+
+```markdown
+# Testing Context for MyApp
+
+## Important User Flows
+1. User registration and email verification
+2. Checkout with credit card
+3. Password reset flow
+
+## Areas to Focus On
+- Shopping cart edge cases
+- Form validation on checkout page
+- Mobile responsive behavior
+
+## Things to Avoid
+- Admin panel (/admin/*)
+- Internal API endpoints
+```
+
+**Context Sources (in merge order):**
+
+| Source | Merge Order | Description |
+|--------|-------------|-------------|
+| `--context` | 1 (first) | File-based context |
+| `--context-text` | 2 | Inline text |
+| `TESTARION_CONTEXT` | 3 (last) | Environment variable (session default) |
+
+All sources are combined with labeled headers and included in AI prompts.
+
+**Size Limits:**
+
+- Maximum context size: 100KB
+- Warning threshold: 50KB (processing continues)
 
 ### Reset Prompts
 
